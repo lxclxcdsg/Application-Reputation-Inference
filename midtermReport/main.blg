@@ -1,0 +1,15 @@
+This is BibTeX, Version 0.99dThe top-level auxiliary file: main.aux
+The style file: abbrv.bst
+Database file #1: sigproc.bib
+I was expecting a `,' or a `}'---line 7 of file sigproc.bib
+ :  
+ :  DOI = "https://www.fireeye.com/current-threats/anatomy-of-a-cyber-attack.html"}
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+Warning--entry type for "defendapt" isn't style-file defined
+--line 129 of file sigproc.bib
+Warning--to sort, need author or key in ya:yahooleak
+Warning--to sort, need author or key in trustwave
+Warning--to sort, need author or key in killchain
+Warning--empty journal in fireeye:anatomy
+(There was 1 error message)

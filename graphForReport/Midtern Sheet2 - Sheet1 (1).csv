@@ -1,0 +1,4 @@
+Entity,Attributes,Shape in Graph
+File,Absolute Path,Ellipse
+Process,PID and Name,Square
+Network Connection,IP and Port,Parallelogram
