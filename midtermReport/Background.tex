@@ -115,6 +115,16 @@ Reducing the data volume is key to solving the scalability problem. Comparing th
 
 %While data reduction is a well-studies topic, the most commonly used techniques, spatial and temporal sampling, are not applicable to dependency analysis based on system event traces. Because sampling techniques do not have the inherit concept of causal relations, they are prone to introducing random causal errors. 
 
+
+\begin{figure*}[!htp]
+	\centering
+	
+	\includegraphics[width=0.8\textwidth]{figFlow.png}
+	\caption{Overview of automatic dependency analysis}
+	\label{fig:steps}
+\end{figure*}
+
+
 \subsubsection{Design}
 In this section,  we first present a formal definition of important terms and concepts used in our design.
 First, two events have \textit{causality dependency} with each other if an event has information flow that affect the other event.\\
