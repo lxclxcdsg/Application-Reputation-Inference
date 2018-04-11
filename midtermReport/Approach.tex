@@ -8,10 +8,11 @@ In this part, we will present two parts of our work. The first one is about how 
 %		\end{adjustbox}
 %	\end{center}
 %\end{wrapfigure}
-\begin{figure}
+\begin{figure}[!htp]
 	\centering
-	\caption{Overview of automatic dependency analysis}
+
 	\includegraphics[width=0.48\textwidth]{figFlow.png}
+	\caption{Overview of automatic dependency analysis}
 	\label{fig:steps}
 \end{figure}
 
@@ -37,8 +38,7 @@ The identifier for process is its name and id.  For file, it is identified by it
 		\end{tabular}%
 	}
 \end{table}
-
-\begin{table}[t!p]
+\begin{table}[!htp]
 	\centering
 	\caption{Representative attributes of system events}
 	\label{table2}
@@ -51,28 +51,8 @@ The identifier for process is its name and id.  For file, it is identified by it
 	\end{tabular}
 \end{table}
 
-\begin{algorithm}
-	\caption{GraphSplit}
-	\KwIn{A dependency Graph}
-	\SetKwFunction{FindPair}{FindPair}
-	\SetKwFunction{UpdateGraph}{UpdateGraph}
-	\SetKwFunction{RecoverTimeLogic}{RecoverTimeLogic}
-	\textbf{function}: GraphSplit$(\textit(G))$\\
-	$Queue$ $\leftarrow$ \FindPair{$G$}\;
-	\While{Queue is not Empty}{
-		$V$ $\leftarrow$ $Queue.poll()$\;
-		$S \leftarrow V.source$\;
-		$T \leftarrow V.target$\;
-		\If{Set contains S $or$ Set contains T}{continue}
-		$list1 \leftarrow$ list of outgoing edges of $S$ whose object is not $T$\;
-		$list2 \leftarrow$ V.list\;
-		\UpdateGraph($G$,$list1$,$list2$)\;
-		add $S$ to Set\;
-		$Queue \leftarrow$ \FindPair($G$)\;
-	}
-	\RecoverTimeLogic{$Set$}\;	
-	\label{alg:split}
-\end{algorithm}
+
+
 
 \textbf{Limitations of Existing Work}.
 In the existed research work, the information for the dependency analysis only includes file name, process, IP addresses and attributes of events including event origins, operations $($file read/write$)$, and other security-related properties. However, to infer application reputation, only these attributes are not enough.
@@ -94,9 +74,30 @@ and use this new attribute as part of the computation for the weights of the edg
 The second  improvement compared with the traditional dependency analysis method is that we observe that the amount of transferred data is another important factor that impacts the reputation propagation.Not all the updates are rewriting application executables to malicious executables; some updates to an application are merely for property updates.
 For example, in Windows, the search indexer program frequently updates executables' metadata for indexing purposes, and each update writes only a few bytes to the executables.
 Therefore, we propose to extract \emph{the amount of data transferred} for each read/write operation and annotates the corresponding edges in the dependency graph with this information.
-The larger amount of data transferred, the more important the edge is.
-
-\begin{algorithm}
+The larger amount of data transferred, the more important the edge is. So for the weight calculation, we need to consider the relative time and amount of data together. 
+\begin{algorithm}[tb]
+	\caption{GraphSplit}
+	\KwIn{A dependency Graph}
+	\SetKwFunction{FindPair}{FindPair}
+	\SetKwFunction{UpdateGraph}{UpdateGraph}
+	\SetKwFunction{RecoverTimeLogic}{RecoverTimeLogic}
+	\textbf{function}: GraphSplit$(\textit(G))$\\
+	$Queue$ $\leftarrow$ \FindPair{$G$}\;
+	\While{Queue is not Empty}{
+		$V$ $\leftarrow$ $Queue.poll()$\;
+		$S \leftarrow V.source$\;
+		$T \leftarrow V.target$\;
+		\If{Set contains S $or$ Set contains T}{continue}
+		$list1 \leftarrow$ list of outgoing edges of $S$ whose object is not $T$\;
+		$list2 \leftarrow$ V.list\;
+		\UpdateGraph($G$,$list1$,$list2$)\;
+		add $S$ to Set\;
+		$Queue \leftarrow$ \FindPair($G$)\;
+	}
+	\RecoverTimeLogic{$Set$}\;	
+	\label{alg:split}
+\end{algorithm}
+\begin{algorithm}[!htbp]
 	\caption{FindPair}
 	\KwIn{A dependency Graph(G)}
 	\KwResult{A queue containing the vertex pair need to be splited}
@@ -111,6 +112,7 @@ The larger amount of data transferred, the more important the edge is.
 			$Queue$ add $vertexPair$\;}
 	}
 	\Return{Queue}
+	\label{alg:find}
 \end{algorithm}
 
 
@@ -156,19 +158,30 @@ The larger amount of data transferred, the more important the edge is.
 		\For{$e \in$ in the incoming edges of $S$}{
 			$G$ add a new edge from the source of $e$ to $u$\;}
 	}
-	remove $S$, the incoming and outgoing edges of $S$ from the $G$\;	
+	remove $S$, the incoming and outgoing edges of $S$ from the $G$\;
+	\label{alg:update}
 \end{algorithm}
 
 
 
-\subsection{Inference of Application Reputation via PageRank (Milestone 2)}
+\subsection{Inference of Application Reputation via\\PageRank (Milestone 2)}
+
 PageRank~\cite{pagerank} considers the World Wide Web as a set of linked nodes and ranks them based on their importance. The insight of PageRank is that a node linked by important nodes should be more important than the ones linked by uninfluenced nodes. That is, a web page's "reputation" is impacted by all the other web pages pointing to it. PageRank uses a transition matrix to represent the weights of edges from node \textit{j} to node \textit{i}. However,although Causality Preserve Reduction can merge many edges, there still may have multiple edges existing the same pair of nodes, because we don't want that the dependency relationship is lost during Causality Preserve Reduction. Therefore, we borrow the idea of static single assignment from(SSA)~\cite{nielson2004principles}, splitting source node  into multiple nodes, where each of the split node has only one outgoing edge pointing to target node. We need duplicate all the edges originally pointing to source to each of the split node from node j.By replacing source node with the split nodes, we can then use PageRank to compute system entities' reputation.
 
 \textbf{Graph Split}.
-Algorithm~\ref{alg:split} shows the algorithm for GraphSplit. 
-The basic idea for GraphSplit is that for every vertex$(V)$ of the dependency graph, we need to check its incoming edges. If several incoming edges share the same source, we declare a \textit{vertexPair} contains object $V$, source $S$ and a list of edges that connect these two vertexes. We maintain a queue for all $vertexPairs$. We also maintain a set of vertex has already been split.If we find the current $vertexPair.S$ or $vertexPair.V$ is split, then we just skip it in current round. We will split it in the next round. Here is the relevant function of GraphSplit.
+Algorithm 1 shows the algorithm for GraphSplit. 
+The basic idea for GraphSplit is that for every vertex$(V)$ of the dependency graph, we need to check its incoming edges. If several incoming edges share the same source, we declare a \textit{vertexPair} contains object $V$, source $S$ and a list of edges that connect these two vertexes. We maintain a queue for all $vertexPairs$. We also maintain a set of vertex has already been split. If we find the current $vertexPair.S$ or $vertexPair.V$ has been split$(Line 7)$, then we just skip this pair. If both  $vertexPair.S$ and $vertexPair.V$  are not be split, the \textit{GraphSplit} will call \textit{UpdateGraph} to split $vertex$-$Pair.S$ at line 12. Then line 14 \textit{FindPair} will update this queue. If the queue is empty, it means no more vertexes need to be split.
 
-\begin{algorithm}
+\textbf{Find Pair}.
+The basic idea of Algorithm \textit{FindPair} is to count the edges between any connected vertexes. If any pair vertexes is connected by more than one edge, we will declare a \textit{vertexPair} and push it into the queue. 
+
+\textbf{Update Graph}.
+This function generates vertexes that are as the same number as edges existing between the $vertexPair.S$ and $vertexPair.V$$($from line 3 to 8$)$ and then adds the copy of other outgoing and incoming edges of $vertexPair.S$ to these new vertexes$($from line 9 to 18$)$. After this, we can removes the $vertexPair.S$ and all the edges that connect with $ver$-$texPair.S$ from the input dependency graph.
+
+\textbf{Recover Time Logic}.
+This function is used to rebuild the time logic of the dependency graph. The Function \textit{UpdateGraph} only deals with the graph geometric structure. According to the backward dependency definition~\cite{backtracking,backtrackingfile,backtracking2}, we need to make sure the exit time of any incoming edge of node generated by \textit{UpdateGraph} is not bigger than its largest starting time of outgoing edges. If any incoming edge breaks this rule, we need to remove it. The line 4 in Algorithm 4 is to check whether this node is generated by \textit{UpdateGraph}. The line from 6 to 8 is to rebuild backward dependency.  
+
+\begin{algorithm}[b]
 	\caption{RecoverTimeLogic}
 	\KwIn{A set of splited vertex}
 	\textbf{function}: RecoverTimeLogic$\textit(Set)$\\
@@ -181,7 +194,8 @@ The basic idea for GraphSplit is that for every vertex$(V)$ of the dependency gr
 				}
 			}
 		}
-	} 	
+	}
+	\label{alg:recover} 	
 \end{algorithm}
 
 %\begin{algorithm}

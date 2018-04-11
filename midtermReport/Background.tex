@@ -63,22 +63,55 @@ Assume that we identified a malicious script in the web server.
 To understand how it infects a victim machine, we can start the investigation of the process that executed or read from the script,
 and trace whether they propagate the malicious scripts across hosts
 In this project, the goal of this step is to reconstruct the time line in an attack.
-However, modern operation system is very complex, even through the user does not do any specific operation, it still has many service process running at the backend. That will generate many log records in the audit tool's output. In other words, these events will be represented as many edges and vertexes that we don't need. So we need to run backtrack\cite{backtracking, backtracking2} from at least one \textit{detection point}\cite{lamport1978time}, such as a modified, extra, or deleted file, or a suspicious or missing process. There are two standards to decide which system entity or operation is relevant to \textit{detection point} or not. The first one is whether there is a path existing between two vertexes or not. That means the source entity can use several operations to affect the state of the object entity. The second one is that the time intervals can be used to reduce false dependencies. For example, a process that reads a file at time 10 does not depend on writes to the file that that occur after time 10. Fiture~\ref{fig:backtrack} is the dependency reconstruction about how a python script read data from source file and then write data to another file. It is not hard to notice there are multiple edge existing between the same pair of vertexes. It gives us ground to further reduce the size of this dependency graph.
-\begin{figure}[p]
-	\centering
-	\includegraphics[width=1.3\textwidth,angle=90]{fileBack.jpg}
-	\caption{Backtracking of File operation}
-	\label{fig:backtrack}
+However, modern operation system is very complex, even through the user does not do any specific operation, it still has many service process running at the backend. That will generate many log records in the audit tool's output. In other words, these events will be represented as many edges and vertexes that we don't need. So we need to run backtrack\cite{backtracking, backtracking2} from at least one \textit{detection point}\cite{lamport1978time}, such as a modified, extra, or deleted file, or a suspicious or missing process. There are two standards to decide which system entity or operation is relevant to \textit{detection point} or not. The first one is whether there is a path existing between two vertexes or not. That means the source entity can use several operations to affect the state of the object entity. The second one is that the time intervals can be used to reduce false dependencies. For example, a process that reads a file at time 10 does not depend on writes to the file that that occur after time 10. The figure in the first column of Fiture~\ref{fig:backandCPR} is the dependency reconstruction about how a python script read data from source file and then write data to another file. It is not hard to notice there are multiple edge existing between the same pair of vertexes. It gives us ground to further reduce the size of this dependency graph.
+%\begin{figure}[!htbp]
+%	\centering
+%	\includegraphics[width=1.3\textwidth,angle=90]{fileBack.jpg}
+%	\caption{Backtracking of File operation}
+%	\label{fig:backtrack}
+%\end{figure}
+\subsection{Causality Preserve Reduction}
+From the graph processed by the Backtrack, it is not hard to notice that there are always multiple edges between the same pair of vertexes. This is because the number of operations is not equal to the log record number. For example, If one user try to read a file, the system will not read all data from disk at one time, it will read it hundreds or thousands times. In other words, many edges are corresponding to the same event. In a real-world scenario, an average desktop computer produces more than 1 million events per day, while a server could yield 10 to 100 times the volume. 
+%Each day, a rather small system of 100 computers generated more than 200 million events, which requires mid- to high-end server to process and produces databases over 200GB. 
+Reducing the data volume is key to solving the scalability problem. Comparing the first and second column of Fiture~\ref{fig:backandCPR}, there is no more duplicate edges between the same pair of vertexes.
+%\begin{figure}[!htbp]
+%	\centering
+%	\includegraphics[width=1.3\textwidth,angle=90]{fileBack.jpg}
+%	\caption{Backtracking of File operation}
+%	\label{fig:CPR}
+%\end{figure}
+%\begin{figure*}[!hp]
+%	\centering
+%	\subfloat[Backtracking]{
+%		\includegraphics[align=c,width=1.3\textwidth, angle=90]{fileBack.jpg}}
+%	\vfill
+%	\subfloat[Causality Preserve Reduction]{
+%		\includegraphics[align=c, width=1.3\textwidth,angle=90]{fileCPR.jpg}}
+%\end{figure*}
+\begin{figure}[htbp]
+	\begin{minipage}[t][0.8\textheight]{0.5\textwidth}
+		\centering
+		\includegraphics[align=c, width=\textheight,angle=90]{fileBack.jpg}
+		\hspace{0.1\textwidth}
+		\includegraphics[align=c, width=\textheight,angle=90]{fileCPR.jpg}
+	\end{minipage}
+	\caption{Backtracking And Causality Preserve Reduction Result}
+	\label{fig:backandCPR}
 \end{figure}
 
-\subsection{Causality Preserve Reduction}
-From the graph processed by the Backtrack, it is not hard to notice that there are always multiple edges between the same pair of vertexes. This is because the number of operations is not equal to the log record number. For example, If one user try to read a file, the system will not read all data from disk at one time, it will read it hundreds or thousands times. In other words, many edges are corresponding to the same event. In a real-world scenario, an average desktop computer produces more than 1 million events per day, while a server could yield 10 to 100 times the volume. Each day, a rather small system of 100 computers generated more than 200 million events, which requires mid- to high-end server to process and produces databases over 200GB. A larger enterprise can easily have more than 100,000 computers, and may require them to store the monitored data fro several months or even years. Such a workload make it impractical to deploy and accurate dependency analysis to large enterprise. Reducing the data volume is key to solving the scalability problem.
-\begin{figure}[p]
-	\centering
-	\includegraphics[width=1.3\textwidth,angle=90]{fileCPR.jpg}
-	\caption{Backtracking of File operation}
-	\label{fig:CPR}
-\end{figure}
+%\begin{figure}[!htp]
+%	\centering
+%	\begin{minipage}{0.25\textwidth}
+%		\centering
+%		\includegraphics[align=c,width=\textheight, angle=90]{fileBack.jpg}
+%		\caption{Backtracking}
+%	\end{minipage}
+%	\begin{minipage}{0.25\textwidth}
+%				\centering
+%				\includegraphics[align=c,width=\textheight, angle=90]{fileCPR.jpg}
+%				\caption{CPR}
+%	\end{minipage}
+%\end{figure}
 
 %While data reduction is a well-studies topic, the most commonly used techniques, spatial and temporal sampling, are not applicable to dependency analysis based on system event traces. Because sampling techniques do not have the inherit concept of causal relations, they are prone to introducing random causal errors. 
 
@@ -93,9 +126,6 @@ DEFINITION 1: \textbf{Causality Dependency} \\
 \end{itemize}
 if $e_1$ has information flow to $e_2$ and $e_2$  has information flow to $e_3$, then $e_1$ and $e_3$ have causality dependency.
 Our primary reduction scheme aims at preserving causality dependency while performing the data reduction. For example， assuming there are multiple edges between the vertex $u$ and $v$, we need to check whether the merge of edges will break the backward trackability and forward trackability~\cite{xu2016high}.We can merge the edges, if that merge will not loss the information about causality dependency.
-\begin{figure}
-	
-\end{figure}
 
 %\subsection{Graph Split}
 % PageRank~\cite{pagerank} considers the World Wide Web as a set of linked nodes and ranks them based on their importance. The insight of PageRank is that a node linked by important nodes should be more important than the ones linked by uninfluenced nodes. That is, a web page's "reputation" is impacted by all the other web pages pointing to it. PageRank uses a transition matrix to represent the weights of edges from node \textit{j} to node \textit{i}. However,although Causality Preserve Reduction can merge many edges, there still may have multiple edges existing the same pair of nodes, because we don't want that the dependency relationship is lost during Causality Preserve Reduction. Therefore, we borrow the idea of static single assignment from(SSA)~\cite{nielson2004principles}, splitting source node  into multiple nodes, where each of the split node has only one outgoing edge pointing to target node. We need duplicate all the edges originally pointing to source to each of the split node from node j.By replacing source node with the split nodes, we can then use PageRank to compute system entities' reputation.\\

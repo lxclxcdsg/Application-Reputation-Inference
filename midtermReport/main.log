@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6650 64-bit) (preloaded format=pdflatex 2018.4.6)  10 APR 2018 16:39
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6650 64-bit) (preloaded format=pdflatex 2018.4.6)  11 APR 2018 17:14
 entering extended mode
 **./main.tex
 (main.tex
@@ -514,28 +514,40 @@ Package: wrapfig 2003/01/31  v 3.6
 ("C:\Users\fang2\AppData\Local\Programs\MiKTeX 2.9\tex\latex\lipsum\lipsum.sty"
 Package: lipsum 2014/07/27 v1.3 150 paragraphs of Lorem Ipsum dummy text
 \c@lips@count=\count128
+)
+("C:\Users\fang2\AppData\Local\Programs\MiKTeX 2.9\tex\latex\graphbox\graphbox.
+sty"
+Package: graphbox 2018/01/17 v1.1 extension for graphicx to adjust containing b
+ox
+\Gin@box@box=\box42
+\Gin@box@width=\skip71
+\Gin@box@height=\skip72
+\Gin@box@raise=\skip73
+\Gin@box@hspace=\skip74
+\Gin@box@bwidth=\skip75
+\Gin@box@bheight=\skip76
 ) (main.aux)
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 63.
-LaTeX Font Info:    ... okay on input line 63.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 63.
-LaTeX Font Info:    ... okay on input line 63.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 63.
-LaTeX Font Info:    ... okay on input line 63.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 63.
-LaTeX Font Info:    ... okay on input line 63.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 63.
-LaTeX Font Info:    ... okay on input line 63.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 63.
-LaTeX Font Info:    ... okay on input line 63.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 64.
+LaTeX Font Info:    ... okay on input line 64.
 
 ("C:\Users\fang2\AppData\Local\Programs\MiKTeX 2.9\tex\context\base\supp-pdf.mk
 ii"
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count129
 \scratchdimen=\dimen150
-\scratchbox=\box42
+\scratchbox=\box43
 \nofMPsegments=\count130
 \nofMParguments=\count131
 \everyMPshowfont=\toks40
@@ -549,35 +561,22 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: subfig package v1.3 is loaded.
 Package caption Info: wrapfig package is loaded.
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Try loading font information for U+msa on input line 187.
+LaTeX Font Info:    Try loading font information for U+msa on input line 184.
  ("C:\Users\fang2\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsfonts\umsa.fd"
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 187.
+LaTeX Font Info:    Try loading font information for U+msb on input line 184.
  ("C:\Users\fang2\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd"
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Try loading font information for U+lasy on input line 187.
+LaTeX Font Info:    Try loading font information for U+lasy on input line 184.
  ("C:\Users\fang2\AppData\Local\Programs\MiKTeX 2.9\tex\latex\base\ulasy.fd"
 File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
 )
-Overfull \hbox (10.71048pt too wide) in paragraph at lines 187--187
- []\eaddfnt lleipuner@researchlabs.org| 
- []
-
-LaTeX Font Info:    Try loading font information for T1+ptm on input line 187.
-("C:\Users\fang2\AppData\Local\Programs\MiKTeX 2.9\tex\latex\psnfss\t1ptm.fd"
+LaTeX Font Info:    Try loading font information for T1+ptm on input line 184.
+ ("C:\Users\fang2\AppData\Local\Programs\MiKTeX 2.9\tex\latex\psnfss\t1ptm.fd"
 File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
-)
-LaTeX Font Info:    Try loading font information for OMS+ptm on input line 187.
-
-
-("C:\Users\fang2\AppData\Local\Programs\MiKTeX 2.9\tex\latex\psnfss\omsptm.fd"
-File: omsptm.fd 
-)
-LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <7> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 187.
-(Abstract.tex
+) (Abstract.tex
 Overfull \hbox (5.26268pt too wide) in paragraph at lines 2--3
 \T1/aer/m/n/9 even well-protected busi-nesses with sig-nif-i-cant fi-nan-cial l
 osses.
@@ -590,7 +589,7 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 ]
-<temporal-graph.jpg, id=14, 642.4803pt x 150.68295pt>
+<temporal-graph.jpg, id=11, 642.4803pt x 150.68295pt>
 File: temporal-graph.jpg Graphic file (type jpg)
 <use temporal-graph.jpg>
 Package pdftex.def Info: temporal-graph.jpg  used on input line 6.
@@ -606,7 +605,7 @@ Overfull \hbox (4.90846pt too wide) in paragraph at lines 11--12
 d
  []
 
-<fig1.png, id=15, 505.89pt x 277.035pt>
+<fig1.png, id=12, 505.89pt x 277.035pt>
 File: fig1.png Graphic file (type png)
 <use fig1.png>
 Package pdftex.def Info: fig1.png  used on input line 15.
@@ -627,7 +626,7 @@ Overfull \hbox (19.37599pt too wide) in paragraph at lines 21--22
 \T1/aett/m/n/9 %proc.name (%proc.pid) %evt.dir %evt.type cwd=%proc.cwd
  []
 
-<fig2.png, id=17, 691.08188pt x 173.89969pt>
+<fig2.png, id=14, 691.08188pt x 173.89969pt>
 File: fig2.png Graphic file (type png)
 <use fig2.png>
 Package pdftex.def Info: fig2.png  used on input line 39.
@@ -653,116 +652,121 @@ er/m/it/9 switch
 <fileBack.jpg, id=26, 6441.06375pt x 292.09125pt>
 File: fileBack.jpg Graphic file (type jpg)
 <use fileBack.jpg>
-Package pdftex.def Info: fileBack.jpg  used on input line 69.
-(pdftex.def)             Requested size: 655.20154pt x 29.71pt.
-
-
-LaTeX Warning: Float too large for page by 9.70152pt on input line 72.
-
+Package pdftex.def Info: fileBack.jpg  used on input line 94.
+(pdftex.def)             Requested size: 666.0pt x 30.20027pt.
 <fileCPR.jpg, id=27, 6092.7625pt x 292.09125pt>
 File: fileCPR.jpg Graphic file (type jpg)
 <use fileCPR.jpg>
-Package pdftex.def Info: fileCPR.jpg  used on input line 78.
-(pdftex.def)             Requested size: 655.20154pt x 31.4081pt.
+Package pdftex.def Info: fileCPR.jpg  used on input line 96.
+(pdftex.def)             Requested size: 666.0pt x 31.92511pt.
 
-LaTeX Warning: Float too large for page by 9.70152pt on input line 81.
+Overfull \hbox (12.0pt too wide) in paragraph at lines 92--98
+[][] 
+ []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
+LaTeX Warning: Float too large for page by 30.99998pt on input line 100.
 
- [3 <./fileBack.jpg>]) (Approach.tex
-<figFlow.png, id=33, 840.13875pt x 121.57922pt>
+[3 <./fileBack.jpg> <./fileCPR.jpg>]) (Approach.tex
+<figFlow.png, id=32, 840.13875pt x 121.57922pt>
 File: figFlow.png Graphic file (type png)
 <use figFlow.png>
 Package pdftex.def Info: figFlow.png  used on input line 14.
 (pdftex.def)             Requested size: 241.91785pt x 35.00847pt.
 
-Overfull \hbox (1.91785pt too wide) in paragraph at lines 14--16
+Overfull \hbox (1.91785pt too wide) in paragraph at lines 14--15
  [][] 
  []
 
 
-LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 20.
+Overfull \hbox (5.1815pt too wide) in paragraph at lines 19--19
+[]\secfnt Enhanced De-pen-dency Anal-y-sis (Mile-stone
+ []
 
-
-LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 35.
-
-[4 <./fileCPR.jpg>] [5 <./figFlow.png>] [6
-
-]) (PreliminaryResult.tex
-
-LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 28.
-
-
-Overfull \hbox (11.9971pt too wide) in paragraph at lines 32--43
+[4 <./figFlow.png>]
+Overfull \hbox (30.59518pt too wide) in paragraph at lines 126--136
  [][] 
  []
 
-<testSample.png, id=46, 721.57079pt x 478.03593pt>
+
+Overfull \hbox (2.78883pt too wide) in paragraph at lines 171--174
+[]\T1/aer/bx/n/9 Graph Split\T1/aer/m/n/9 . Al-go-rithm 1 shows the al-go-rithm
+ for Graph-
+ []
+
+
+Overfull \hbox (7.10056pt too wide) in paragraph at lines 171--174
+\T1/aer/m/n/9 Split. The ba-sic idea for Graph-Split is that for ev-ery vertex$
+\OT1/cmr/m/n/9 (\OML/cmm/m/it/9 V\OT1/cmr/m/n/9 )$
+ []
+
+
+Overfull \hbox (25.38113pt too wide) in paragraph at lines 178--180
+\T1/aer/m/n/9 are as the same num-ber as edges ex-ist-ing be-tween the $\OML/cm
+m/m/it/9 vertexPair:S$
+ []
+
+[5]) (PreliminaryResult.tex
+<testSample.png, id=42, 720.06516pt x 487.44609pt>
 File: testSample.png Graphic file (type png)
 <use testSample.png>
-Package pdftex.def Info: testSample.png  used on input line 46.
-(pdftex.def)             Requested size: 252.0pt x 166.94307pt.
+Package pdftex.def Info: testSample.png  used on input line 33.
+(pdftex.def)             Requested size: 252.0pt x 170.58636pt.
 
-Overfull \hbox (12.0pt too wide) in paragraph at lines 46--47
+Overfull \hbox (12.0pt too wide) in paragraph at lines 33--34
  [][] 
  []
 
-<sampleResult.png, id=47, 748.67203pt x 420.82219pt>
+<sampleResult.png, id=43, 748.67203pt x 420.82219pt>
 File: sampleResult.png Graphic file (type png)
 <use sampleResult.png>
-Package pdftex.def Info: sampleResult.png  used on input line 52.
+Package pdftex.def Info: sampleResult.png  used on input line 39.
 (pdftex.def)             Requested size: 252.0pt x 141.6457pt.
 
-Overfull \hbox (12.0pt too wide) in paragraph at lines 52--53
+Overfull \hbox (12.0pt too wide) in paragraph at lines 39--40
  [][] 
  []
 
 ) (main.bbl
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 1028) has occurred while \output is active []
 
- [7
-
- <./testSample.png> <./sampleResult.png>]
+ [6 <./testSample.png> <./sampleResult.png>]
 Overfull \hbox (1.06079pt too wide) in paragraph at lines 119--123
 \T1/aer/m/n/9 http://www.nytimes.com/2014/02/27/business/target- 
  []
 
-) [8
+) [7
 
-] (main.aux) ) 
+] [8] (main.aux) ) 
 Here is how much of TeX's memory you used:
- 7777 strings out of 493305
- 120737 string characters out of 3129803
- 339471 words of memory out of 3000000
- 11099 multiletter control sequences out of 15000+200000
- 63862 words of font info for 86 fonts, out of 3000000 for 9000
+ 7832 strings out of 493305
+ 121621 string characters out of 3129803
+ 334203 words of memory out of 3000000
+ 11150 multiletter control sequences out of 15000+200000
+ 65982 words of font info for 93 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 67i,19n,108p,1586b,500s stack positions out of 5000i,500n,10000p,200000b,50000s
-{C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/enc/dvips
-/base/8r.enc}<C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/publ
-ic/amsfonts/cm/cmbx9.pfb><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/font
-s/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/fang2/AppData/Local/Programs/MiK
-TeX 2.9/fonts/type1/public/amsfonts/cm/cmmi9.pfb><C:/Users/fang2/AppData/Local/
-Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/fang2/App
-Data/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/User
-s/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr9.p
-fb><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfont
-s/cm/cmsy7.pfb><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/pu
-blic/amsfonts/cm/cmsy9.pfb><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fo
-nts/type1/public/amsfonts/cm/cmti7.pfb><C:/Users/fang2/AppData/Local/Programs/M
-iKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti9.pfb><C:/Users/fang2/AppData/Loca
-l/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt9.pfb><C:/Users/fang2/
-AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/helvetic/uhvb8a.pfb><C:/Users
-/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/helvetic/uhvr8a.pfb><C
-:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmb8a.pf
-b><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmr8
-a.pfb><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/u
-tmri8a.pfb>
-Output written on main.pdf (8 pages, 1772814 bytes).
+ 67i,21n,108p,1586b,570s stack positions out of 5000i,500n,10000p,200000b,50000s
+{C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/enc/d
+vips/base/8r.enc}<C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/
+public/amsfonts/cm/cmbx9.pfb><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/
+fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/fang2/AppData/Local/Programs
+/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi9.pfb><C:/Users/fang2/AppData/Lo
+cal/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/fang2
+/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/
+Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cm
+r8.pfb><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/ams
+fonts/cm/cmr9.pfb><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1
+/public/amsfonts/cm/cmsy9.pfb><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9
+/fonts/type1/public/amsfonts/cm/cmti7.pfb><C:/Users/fang2/AppData/Local/Program
+s/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti9.pfb><C:/Users/fang2/AppData/L
+ocal/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt9.pfb><C:/Users/fan
+g2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/helvetic/uhvb8a.pfb><C:/Us
+ers/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/helvetic/uhvr8a.pfb
+><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmb8a
+.pfb><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/ut
+mr8a.pfb><C:/Users/fang2/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/time
+s/utmri8a.pfb>
+Output written on main.pdf (8 pages, 1854401 bytes).
 PDF statistics:
  108 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
