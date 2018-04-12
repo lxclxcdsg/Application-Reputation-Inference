@@ -72,7 +72,7 @@ Therefore, we propose to extract \emph{the amount of data transferred} for each 
 The larger amount of data transferred, the more important the edge is. So for the weight calculation, we need to consider the relative time and amount of data together. 
 
 \begin{algorithm}[t]
-	\caption{GraphSplit}
+
 	\KwIn{A dependency Graph}
 	\SetKwFunction{FindPair}{FindPair}
 	\SetKwFunction{UpdateGraph}{UpdateGraph}
@@ -102,11 +102,12 @@ The larger amount of data transferred, the more important the edge is. So for th
 %		$Queue \leftarrow$ \FindPair($G$)\;
 %	}
 	\RecoverTimeLogic{$Set$}\;	
+		\caption{GraphSplit}
 	\label{alg:split}
 \end{algorithm}
 
 \begin{algorithm}[!htbp]
-	\caption{FindPair}
+
 	\KwIn{A dependency Graph(G)}
 	\KwResult{A queue containing the vertex pair need to be splited}
 	\textbf{function}: FindPair$\textit(G)$\\
@@ -120,6 +121,7 @@ The larger amount of data transferred, the more important the edge is. So for th
 			$Queue$ add $vertexPair$\;}
 	}
 	\Return{Queue}
+	\caption{FindPair}
 	\label{alg:find}
 \end{algorithm}
 
@@ -146,7 +148,7 @@ The larger amount of data transferred, the more important the edge is. So for th
 \end{table*}
 
 \begin{algorithm}
-	\caption{UpdateGraph}
+
 	\KwIn{A dependency Graph and.\\
 		list1 is a list of outgoning edges of the source except edges whose object is V. \\
 		list2 is a list containing edges between S and V}
@@ -167,6 +169,7 @@ The larger amount of data transferred, the more important the edge is. So for th
 			$G$ add a new edge from the source of $e$ to $u$\;}
 	}
 	remove $S$, the incoming and outgoing edges of $S$ from the $G$\;
+    \caption{UpdateGraph}
 	\label{alg:update}
 \end{algorithm}
 
@@ -177,20 +180,20 @@ The larger amount of data transferred, the more important the edge is. So for th
 PageRank~\cite{pagerank} considers the World Wide Web as a set of linked nodes and ranks them based on their importance. The insight of PageRank is that a node linked by important nodes should be more important than the ones linked by uninfluenced nodes. That is, a web page's "reputation" is impacted by all the other web pages pointing to it. PageRank uses a transition matrix to represent the weights of edges from node \textit{j} to node \textit{i}. However,although Causality Preserve Reduction can merge many edges, there still may have multiple edges existing the same pair of nodes, because we don't want that the dependency relationship is lost during Causality Preserve Reduction. Therefore, we borrow the idea of static single assignment form (SSA)~\cite{nielson2004principles}, splitting source node  into multiple nodes, where each of the split node has only one outgoing edge pointing to target node. We need duplicate all the edges originally pointing to source to each of the split node from node j.By replacing source node with the split nodes, we can then use PageRank to compute system entities' reputation.
 
 \textbf{Graph Split}.
-Algorithm 1 shows the algorithm for GraphSplit. 
-The basic idea for GraphSplit is that for every vertex $(V)$ of the dependency graph, we need to check its incoming edges. If several incoming edges share the same source, it declares a \textit{vertexPair} contains object $V$, source $S$ and a list of edges that connect these two vertexes. It maintains a queue for all $vertexPairs$. It also maintains a set of vertex that has already been split. If it finds the current $vertexPair.S$ or $vertexPair.V$ has been split $(Line 7)$, then it just skip this pair. If both  $vertexPair.S$ and $vertexPair.V$  are not be split, the \textit{GraphSplit} will call \textit{UpdateGraph} to split $vertex$-$Pair.S$ at Line 12. Then Line 14 \textit{FindPair} will update this queue. If the queue is empty, it means no more vertexes need to be split.
+%Algorithm 1 shows the algorithm for GraphSplit. 
+The basic idea for GraphSplit (Algorithm~\ref{alg:split}) is that for every vertex $(V)$ of the dependency graph, we need to check its incoming edges. If several incoming edges share the same source, it declares a \textit{vertexPair} contains object $V$, source $S$ and a list of edges that connect these two vertexes. It maintains a queue for all $vertexPairs$. It also maintains a set of vertex that has already been split. If it finds the current $vertexPair.S$ or $vertexPair.V$ that has been split (Line 7), then it just skip this pair. If both  $vertexPair.S$ and $vertexPair.V$  are not be split, the \textit{GraphSplit} will call \textit{UpdateGraph} to split $vertex$-$Pair.S$ at Line 12. Then Line 14 \textit{FindPair} will update this queue. If the queue is empty, it means no more vertexes need to be split.
 
 \textbf{Find Pair}.
-The basic idea of Algorithm \textit{FindPair} is to count the edges between any connected vertexes. If any pair vertexes is connected by more than one edge, it will declare a \textit{vertexPair} and push it into the queue. 
+The basic idea of \emph{FindPair} (Algorithm~\ref{alg:find}) is to count the edges between any connected vertexes. If any pair vertexes is connected by more than one edge, it will declare a \textit{vertexPair} and push it into the queue. 
 
 \textbf{Update Graph}.
-UpdateGraph will generates vertexes that are as the same number as edges existing between the $vertexPair.S$ and $vertexPair.V$ $($Line 3-8$)$ and then adds the copy of other outgoing and incoming edges of $vertexPair.S$ to these new vertexes $($Lines 9-18$)$. After this, it removes the $vertexPair.S$ and all the edges that connect with $vertexPair.S$ from the input dependency graph.
+\emph{UpdateGraph} (Algorithm~\ref{alg:update}) will generates vertexes that are as the same number as edges existing between the $vertexPair.S$ and $vertexPair.V$ $($Line 3-8$)$ and then adds the copy of other outgoing and incoming edges of $vertexPair.S$ to these new vertexes $($Lines 9-18$)$. After this, it removes the $vertexPair.S$ and all the edges that connect with $vertexPair.S$ from the input dependency graph.
 
 \textbf{Recover Time Logic}.
- RecoverTimeLogic is used to rebuild the time logic of the dependency graph. The Function \textit{UpdateGraph} only deals with the graph geometric structure. According to the backward dependency definition~\cite{backtracking,backtrackingfile,backtracking2}, we need to make sure the starting time of any incoming edge of node generated by \textit{UpdateGraph} is not bigger than its largest exit time of outgoing edges. If any incoming edge breaks this rule, it should be removed. The Line 4 in Algorithm 4 is to check whether this node is generated by \textit{UpdateGraph}. Line 6-8 is to rebuild backward dependency.  
+ RecoverTimeLogic is used to rebuild the time logic of the dependency graph. The Function \textit{UpdateGraph} only deals with the graph geometric structure. According to the backward dependency definition~\cite{backtracking,backtrackingfile,backtracking2}, we need to make sure the starting time of any incoming edge of node generated by \textit{UpdateGraph} is not bigger than its largest exit time of outgoing edges. If any incoming edge breaks this rule, it should be removed. The Line 4 in Algorithm~\ref{alg:recover} is to check whether this node is generated by \textit{UpdateGraph}. Line 6-8 is to rebuild backward dependency.  
 
 \begin{algorithm}[b]
-	\caption{RecoverTimeLogic}
+
 	\KwIn{A set of splited vertex}
 	\textbf{function}: RecoverTimeLogic$\textit(Set)$\\
 	$V \leftarrow G.vertexSet()$\;
@@ -203,6 +206,7 @@ UpdateGraph will generates vertexes that are as the same number as edges existin
 			}
 		}
 	}
+	\caption{RecoverTimeLogic}
 	\label{alg:recover} 	
 \end{algorithm}
 
