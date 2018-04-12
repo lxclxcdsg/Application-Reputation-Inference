@@ -1,5 +1,6 @@
 \section{Approach}
-In this part, we will present two parts of our work. The first one is about how to process the log file and get what kinds of information. The work flow of automatic dependency analysis is illustrated in Figure\ref{fig:steps}.
+In this part, we will present two parts of our work. The first one is about how to process the log file and get what kinds of information. The work flow of automatic dependency analysis is illustrated in Figure\ref{fig:steps}. The first step is to gather the system-monitor data from the host machine. The second step is to build dependency graph and run the Backtracking to get the relevant part of an POI event\cite{xu2016high}. A POI event is an suspicious behavior in the system, such as a modified, extra, or deleted file, or a malicious or missing process. In the Third step, 
+Causality Preserver Reduction(CPR)  is used to reduce the size of dependency graph. And then, running Graphsplit is to make sure no multiple edges existing between the same pair of vertexes. The PageRank will automatically propagate the reputation for all the system entities in the last step and reconstruct time line of APT attacks.
 %\lipsum[1-2]
 %\begin{wrapfigure}{R}{0.5\textwidth}
 %	\begin{center}
@@ -56,7 +57,7 @@ Moreover, dependency analysis includes filters based on the existing works~\cite
 Therefore, it is \emph{necessary} to collect more attributes for the purpose of assigning weights to edges in the produced dependency graph and include more specialized filters to filter out unrelated events in the graph. 
 
 \textbf{Relative Time to the POI event}.
-Currently, we finished the building the dependency graph with additional necessary information. The first one is the relative time to the POI event(Detection Point).Once an application or a library is introduced to a system, it may get modifications via application updates, manually customizations, or malicious alternations. 
+Currently, we finished the building the dependency graph with additional necessary information. The first one is the relative time to the POI event (Detection Point).Once an application or a library is introduced to a system, it may get modifications via application updates, manually customizations, or malicious alternations. 
 That is, a file node in the dependency graph can have multiple \emph{write} edges $($incoming edges$)$ representing initial creation and subsequent updates.
 Intuitively, the write comes latter carries more weights in impacting the application reputation.
 %For example, an application could be created by a benign program and latter gets altered by a malicious program; to capture the latter malicious alternation, usually injecting malicious code, the application's reputation should be considered as \emph{more towards malicious}. 
@@ -78,17 +79,28 @@ The larger amount of data transferred, the more important the edge is. So for th
 	\SetKwFunction{RecoverTimeLogic}{RecoverTimeLogic}
 	\textbf{function}: GraphSplit$(\textit(G))$\\
 	$Queue$ $\leftarrow$ \FindPair{$G$}\;
-	\While{Queue is not Empty}{
-		$V$ $\leftarrow$ $Queue.poll()$\;
-		$S \leftarrow V.source$\;
-		$T \leftarrow V.target$\;
-		\If{Set contains S $or$ Set contains T}{continue}
-		$list1 \leftarrow$ list of outgoing edges of $S$ whose object is not $T$\;
-		$list2 \leftarrow$ V.list\;
-		\UpdateGraph($G$,$list1$,$list2$)\;
-		add $S$ to Set\;
-		$Queue \leftarrow$ \FindPair($G$)\;
-	}
+	\While{Queue is not Empty}{	\While{Queue is not Empty}{
+			$V$ $\leftarrow$ $Queue.poll()$\;
+			$S \leftarrow V.source$\;
+			$T \leftarrow V.target$\;
+			\If{Set contains S $or$ Set contains T}{continue}
+			$list1 \leftarrow$ list of outgoing edges of $S$ whose object is not $T$\;
+			$list2 \leftarrow$ V.list\;
+			\UpdateGraph($G$,$list1$,$list2$)\;
+			add $S$ to Set\;
+		
+		}	$Queue \leftarrow$ \FindPair($G$)\;}
+%	\While{Queue is not Empty}{
+%		$V$ $\leftarrow$ $Queue.poll()$\;
+%		$S \leftarrow V.source$\;
+%		$T \leftarrow V.target$\;
+%		\If{Set contains S $or$ Set contains T}{continue}
+%		$list1 \leftarrow$ list of outgoing edges of $S$ whose object is not $T$\;
+%		$list2 \leftarrow$ V.list\;
+%		\UpdateGraph($G$,$list1$,$list2$)\;
+%		add $S$ to Set\;
+%		$Queue \leftarrow$ \FindPair($G$)\;
+%	}
 	\RecoverTimeLogic{$Set$}\;	
 	\label{alg:split}
 \end{algorithm}
@@ -162,20 +174,20 @@ The larger amount of data transferred, the more important the edge is. So for th
 
 \subsection{Inference of Application Reputation via\\PageRank (Milestone 2)}
 
-PageRank~\cite{pagerank} considers the World Wide Web as a set of linked nodes and ranks them based on their importance. The insight of PageRank is that a node linked by important nodes should be more important than the ones linked by uninfluenced nodes. That is, a web page's "reputation" is impacted by all the other web pages pointing to it. PageRank uses a transition matrix to represent the weights of edges from node \textit{j} to node \textit{i}. However,although Causality Preserve Reduction can merge many edges, there still may have multiple edges existing the same pair of nodes, because we don't want that the dependency relationship is lost during Causality Preserve Reduction. Therefore, we borrow the idea of static single assignment from(SSA)~\cite{nielson2004principles}, splitting source node  into multiple nodes, where each of the split node has only one outgoing edge pointing to target node. We need duplicate all the edges originally pointing to source to each of the split node from node j.By replacing source node with the split nodes, we can then use PageRank to compute system entities' reputation.
+PageRank~\cite{pagerank} considers the World Wide Web as a set of linked nodes and ranks them based on their importance. The insight of PageRank is that a node linked by important nodes should be more important than the ones linked by uninfluenced nodes. That is, a web page's "reputation" is impacted by all the other web pages pointing to it. PageRank uses a transition matrix to represent the weights of edges from node \textit{j} to node \textit{i}. However,although Causality Preserve Reduction can merge many edges, there still may have multiple edges existing the same pair of nodes, because we don't want that the dependency relationship is lost during Causality Preserve Reduction. Therefore, we borrow the idea of static single assignment form (SSA)~\cite{nielson2004principles}, splitting source node  into multiple nodes, where each of the split node has only one outgoing edge pointing to target node. We need duplicate all the edges originally pointing to source to each of the split node from node j.By replacing source node with the split nodes, we can then use PageRank to compute system entities' reputation.
 
 \textbf{Graph Split}.
 Algorithm 1 shows the algorithm for GraphSplit. 
-The basic idea for GraphSplit is that for every vertex$(V)$ of the dependency graph, we need to check its incoming edges. If several incoming edges share the same source, we declare a \textit{vertexPair} contains object $V$, source $S$ and a list of edges that connect these two vertexes. We maintain a queue for all $vertexPairs$. We also maintain a set of vertex has already been split. If we find the current $vertexPair.S$ or $vertexPair.V$ has been split$(Line 7)$, then we just skip this pair. If both  $vertexPair.S$ and $vertexPair.V$  are not be split, the \textit{GraphSplit} will call \textit{UpdateGraph} to split $vertex$-$Pair.S$ at line 12. Then line 14 \textit{FindPair} will update this queue. If the queue is empty, it means no more vertexes need to be split.
+The basic idea for GraphSplit is that for every vertex $(V)$ of the dependency graph, we need to check its incoming edges. If several incoming edges share the same source, it declares a \textit{vertexPair} contains object $V$, source $S$ and a list of edges that connect these two vertexes. It maintains a queue for all $vertexPairs$. It also maintains a set of vertex that has already been split. If it finds the current $vertexPair.S$ or $vertexPair.V$ has been split $(Line 7)$, then it just skip this pair. If both  $vertexPair.S$ and $vertexPair.V$  are not be split, the \textit{GraphSplit} will call \textit{UpdateGraph} to split $vertex$-$Pair.S$ at Line 12. Then Line 14 \textit{FindPair} will update this queue. If the queue is empty, it means no more vertexes need to be split.
 
 \textbf{Find Pair}.
-The basic idea of Algorithm \textit{FindPair} is to count the edges between any connected vertexes. If any pair vertexes is connected by more than one edge, we will declare a \textit{vertexPair} and push it into the queue. 
+The basic idea of Algorithm \textit{FindPair} is to count the edges between any connected vertexes. If any pair vertexes is connected by more than one edge, it will declare a \textit{vertexPair} and push it into the queue. 
 
 \textbf{Update Graph}.
-This function generates vertexes that are as the same number as edges existing between the $vertexPair.S$ and $vertexPair.V$$($from line 3 to 8$)$ and then adds the copy of other outgoing and incoming edges of $vertexPair.S$ to these new vertexes$($Lines 9-18$)$. After this, we can removes the $vertexPair.S$ and all the edges that connect with $ver$-$texPair.S$ from the input dependency graph.
+UpdateGraph will generates vertexes that are as the same number as edges existing between the $vertexPair.S$ and $vertexPair.V$ $($Line 3-8$)$ and then adds the copy of other outgoing and incoming edges of $vertexPair.S$ to these new vertexes $($Lines 9-18$)$. After this, it removes the $vertexPair.S$ and all the edges that connect with $vertexPair.S$ from the input dependency graph.
 
 \textbf{Recover Time Logic}.
-This function is used to rebuild the time logic of the dependency graph. The Function \textit{UpdateGraph} only deals with the graph geometric structure. According to the backward dependency definition~\cite{backtracking,backtrackingfile,backtracking2}, we need to make sure the exit time of any incoming edge of node generated by \textit{UpdateGraph} is not bigger than its largest starting time of outgoing edges. If any incoming edge breaks this rule, we need to remove it. The line 4 in Algorithm 4 is to check whether this node is generated by \textit{UpdateGraph}. The line from 6 to 8 is to rebuild backward dependency.  
+ RecoverTimeLogic is used to rebuild the time logic of the dependency graph. The Function \textit{UpdateGraph} only deals with the graph geometric structure. According to the backward dependency definition~\cite{backtracking,backtrackingfile,backtracking2}, we need to make sure the starting time of any incoming edge of node generated by \textit{UpdateGraph} is not bigger than its largest exit time of outgoing edges. If any incoming edge breaks this rule, it should be removed. The Line 4 in Algorithm 4 is to check whether this node is generated by \textit{UpdateGraph}. Line 6-8 is to rebuild backward dependency.  
 
 \begin{algorithm}[b]
 	\caption{RecoverTimeLogic}
