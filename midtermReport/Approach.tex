@@ -1,3 +1,6 @@
+
+
+
 \section{Approach}
 In this part, we will present two parts of our work. The first one is about how to process the log file and get what kinds of information. The work flow of automatic dependency analysis is illustrated in Figure~\ref{fig:steps}. The first step is to gather the system-monitor data from the host machine. The second step is to build dependency graph and run the Backtracking to get the relevant part of an POI event\cite{xu2016high}. A POI event is an suspicious behavior in the system, such as a modified, extra, or deleted file, or a malicious or missing process. In the Third step, 
 Causality Preserver Reduction(CPR)  is used to reduce the size of dependency graph. And then, running Graphsplit is to make sure no multiple edges existing between the same pair of vertexes. The PageRank will automatically propagate the reputation for all the system entities in the last step and reconstruct time line of APT attacks.
@@ -12,15 +15,15 @@ Causality Preserver Reduction(CPR)  is used to reduce the size of dependency gra
 
 
 \subsection{Enhanced Dependency Analysis (Milestone 1)}
-In this section, we describe the parser that used to process the log file and its advantage.
+In this section, we describe our approach in parsing the logs of system monitoring data, performing dependency analysis, and retrieving the additional information required for enhancing dependency analysis.
 
 \textbf{Log Parsing}.
 Process the log file of the host system is the first step of the dependency analysis. Except the common information used in the dependency analysis, it also need to process the detail information about each operation, such as start and exit time and how much data is involved in this operation. These information is necessary for the calculation of each system entities' reputation.
 
-After gathering the data, we need build the dependency graph based on the log file. There are three type vertexes representing three kind system entities: process, file and network connection.
+After gathering the data, we need to build the dependency graph based on the log file. There are three type vertexes representing three kind system entities: process, file and network connection.
 The identifier for process is its name and id.  For file, it is identified by its absolute file path, for network connection, it is distinguished by two sides' ip and port number. The attributes for these three system entities are showed in Table~\ref{mytable:table1}. We use three kind shape to represent these three system entities. According to the entities included in the system event, the parser need to process five kinds edge : process to process, process to file, file to process, network to process, process to network. The type of edge is decided by the event arguments. The output of Sysdig will use \textit{fd} as its identifier or key word. In the value part, it will use different characters to represent different objects. For example, it use \textit{f} to represent file, \textit{6} to represent IPV6 sockets,\textit{4} to represent IPV4 sockets. This kind information is necessary, without this, it is hard to know the start or end of information flow is a file or an network connection.  Through this way, the parser can know the kind of entities generating this event. For process to process event, we can directly know objects generating this event is two processes, because its event type is unique: fork or clone. In the conclusion, the parser will establish the dependency relationship between two system entities. This dependency relationship is specified by three parts: a source object, a sink object and a time interval$(t_s(e), t_e(e))$. Table2 shows the information that we collect in the log file.
 
-\begin{table}[t!p]
+\begin{table}
 	\centering
 	\caption{Representation Of System Entities}
 	\label{mytable:table1}
@@ -34,7 +37,7 @@ The identifier for process is its name and id.  For file, it is identified by it
 		\end{tabular}%
 	}
 \end{table}
-\begin{table}[!htp]
+\begin{table}
 	\centering
 	\caption{Representative attributes of system events}
 	\label{table2}
@@ -47,7 +50,25 @@ The identifier for process is its name and id.  For file, it is identified by it
 	\end{tabular}
 \end{table}
 
-
+\begin{table*}
+	\centering
+	\caption{Statistical Result}
+	\label{my-label}
+	%	\resizebox{0.5\textwidth}{!}{%
+	\begin{scriptsize}
+		\begin{tabular}{|p{1.5cm}|r|r|r|r|r|r|r|}
+			\hline
+			sample                    & log file size & vertex(original) & edge(original) & vertex(backtracking) & edge(backtracking) & vertex(CPR) & edge(CPR) \\ \hline
+			apt-get instll unrar      & 17.5MB        & 5092             & 28502          & 2148                 & 3911               & 2148        & 2346      \\ \hline
+			apt-get instll postgresql & 53.0MB        & 12174            & 82684          & 2667                 & 11564              & 2667        & 3178      \\ \hline
+			apt-get install zookeeper & 19.7MB        & 4264             & 24368          & 2516                 & 6982               & 2516        & 3020      \\ \hline
+			apt-get install mongoDB   & 65.9MB        & 4205             & 45510          & 2712                 & 11131              & 2712        & 2949      \\ \hline
+			apt-get install wireshark & 66.2MB        & 5838             & 64411          & 3511                 & 34136              & 3511        & 4488      \\ \hline
+		\end{tabular}%
+	\end{scriptsize}
+	
+	%	}
+\end{table*}
 
 
 \textbf{Limitations of Existing Work}.
@@ -74,7 +95,7 @@ The larger amount of data transferred, the more important the edge is. So for th
 
 In a conclusion, the parser collects the relative time and data amount of each event and provides the information that can be used to evaluate each operation's effect on the POI event.  
 
-\begin{algorithm}[t]
+\begin{algorithm}
 
 	\KwIn{A dependency Graph}
 	\SetKwFunction{FindPair}{FindPair}
@@ -109,7 +130,7 @@ In a conclusion, the parser collects the relative time and data amount of each e
 	\label{alg:split}
 \end{algorithm}
 
-\begin{algorithm}[!htbp]
+\begin{algorithm}
 
 	\KwIn{A dependency Graph(G)}
 	\KwResult{A queue containing the vertex pair need to be splited}
@@ -130,25 +151,6 @@ In a conclusion, the parser collects the relative time and data amount of each e
 
 
 
-\begin{table*}[!hp]
-	\centering
-	\caption{Statistical Result}
-	\label{my-label}
-	%	\resizebox{0.5\textwidth}{!}{%
-	\begin{scriptsize}
-		\begin{tabular}{|l|r|r|r|r|r|r|r|}
-			\hline
-			sample                    & log file size & vertex(original) & edge(original) & vertex(backtracking) & edge(backtracking) & vertex(CPR) & edge(CPR) \\ \hline
-			apt-get instll unrar      & 17.5MB        & 5092             & 28502          & 2148                 & 3911               & 2148        & 2346      \\ \hline
-			apt-get instll postgresql & 53.0MB        & 12174            & 82684          & 2667                 & 11564              & 2667        & 3178      \\ \hline
-			apt-get install zookeeper & 19.7MB        & 4264             & 24368          & 2516                 & 6982               & 2516        & 3020      \\ \hline
-			apt-get install mongoDB   & 65.9MB        & 4205             & 45510          & 2712                 & 11131              & 2712        & 2949      \\ \hline
-			apt-get install wireshark & 66.2MB        & 5838             & 64411          & 3511                 & 34136              & 3511        & 4488      \\ \hline
-		\end{tabular}%
-	\end{scriptsize}
-	
-	%	}
-\end{table*}
 
 \begin{algorithm}
 
@@ -186,17 +188,15 @@ PageRank~\cite{pagerank} considers the World Wide Web as a set of linked vertexe
 %Algorithm 1 shows the algorithm for GraphSplit. 
 The basic idea for \emph{GraphSplit} (Algorithm~\ref{alg:split}) is that for every vertex $(V)$ of the dependency graph, we need to check its incoming edges. If several incoming edges share the same source, it declares a \textit{vertexPair} contains object $V$, source $S$ and a list of edges that connect these two vertexes. It maintains a queue for all $vertexPairs$. It also maintains a set of vertex that has already been split. If it finds the current $vertexPair.S$ or $vertexPair.V$ that has been split (Line 8), then it just skip this pair. If both  $vertexPair.S$ and $vertexPair.V$  are not be split, the \emph{GraphSplit} will call \emph{UpdateGraph} to split $vertex$-$Pair.S$ at Line 13. Then Line 16 \emph{FindPair} will update this queue. If the queue is empty, it means no more vertexes need to be split.
 
+
 \textbf{Find Pair}.
 The basic idea of \emph{FindPair} (Algorithm~\ref{alg:find}) is to count the edges between any connected vertexes. If any pair vertexes is connected by more than one edge, it will declare a \textit{vertexPair} and push it into the queue. 
 
 \textbf{Update Graph}.
 \emph{UpdateGraph} (Algorithm~\ref{alg:update}) will generates vertexes that are as the same number as edges existing between the $vertexPair.S$ and $vertexPair.V$ $($Lines 3-8$)$ and then adds the copy of other outgoing and incoming edges of $vertexPair.S$ to these new vertexes $($Lines 9-18$)$. After this, it removes the $vertexPair.S$ and all the edges that connect with $vertexPair.S$ from the input dependency graph.
 
-\textbf{Recover Time Logic}.
- \emph{RecoverTimeLogic} (Algorithm~\ref{alg:recover}) is used to rebuild the time logic of the dependency graph. The Algorithm \emph{UpdateGraph} only deals with the graph's geometric structure. According to the backward dependency definition~\cite{backtracking,backtrackingfile,backtracking2}, we need to make sure the starting time of any incoming edge of vertex generated by \emph{UpdateGraph} is not bigger than its largest exit time of outgoing edges. If any incoming edge breaks this rule, it should be removed. The Line 4 in Algorithm~\ref{alg:recover} is to check whether this vertex is generated by \emph{UpdateGraph}. Lines 6-8 is to rebuild backward dependency.  
-
-\begin{algorithm}[!htb]
-
+\begin{algorithm}
+	
 	\KwIn{A set of splited vertex}
 	\textbf{function}: RecoverTimeLogic$\textit(Set)$\\
 	$V \leftarrow G.vertexSet()$\;
@@ -213,7 +213,15 @@ The basic idea of \emph{FindPair} (Algorithm~\ref{alg:find}) is to count the edg
 	\label{alg:recover} 	
 \end{algorithm}
 
-We are still developing the part about calculation of weight and reputation, there are several key algorithms need to be tested. This part will be showed in the future. 
+
+\textbf{Recover Time Logic}.
+ \emph{RecoverTimeLogic} (Algorithm~\ref{alg:recover}) is used to rebuild the time logic of the dependency graph. The Algorithm \emph{UpdateGraph} only deals with the graph's geometric structure. According to the backward dependency definition~\cite{backtracking,backtrackingfile,backtracking2}, we need to make sure the starting time of any incoming edge of vertex generated by \emph{UpdateGraph} is not bigger than its largest exit time of outgoing edges. If any incoming edge breaks this rule, it should be removed. The Line 4 in Algorithm~\ref{alg:recover} is to check whether this vertex is generated by \emph{UpdateGraph}. Lines 6-8 is to rebuild backward dependency. 
+ 
+
+
+
+\textbf{Weight Computation and Reputation Inference}.
+We are still developing the part about calculation of weight and reputation, there are several key algorithms need to be tested. This part will be presented in the future. 
 %\begin{algorithm}
 %	\caption{RecoverTimeLogic}
 %	\KwIn{A set of splited vertex}
