@@ -101,33 +101,13 @@ public class InferenceRuputation {
 
 
         }
-
-//        int iteration = 100;
-//        double d = 0.15;
-//        for(int i=0; i<iteration; i++){
-//            for(EntityNode e:vertexSet){
-//                Set<EventEdge> edges = graph.incomingEdgesOf(e);
-//                if(edges.size() == 0){
-//                    continue;
-//                }
-//
-//                double rep = 0.0;
-//                for(EventEdge edge : edges){
-//                    EntityNode source = edge.getSource();
-//                    rep += (source.getReputation() * weights.get(e.getID()).get(source.getID()));
-//                }
-//                e.setReputation(rep*(1-d)+d);
-//            }
-//        }
-//        getFinalWeights();
-//        graphiterator.exportGraph("ReputationResult");
     }
 
     public void PageRankIteration(){
         Set<EntityNode> vertexSet = graph.vertexSet();
         double fluctuation = 1.0;
         int iterTime = 0;
-        while(fluctuation >= 0.01){
+        while(fluctuation >= 0.000001){
             double culmativediff = 0.0;
             iterTime++;
             for(EntityNode e: vertexSet){
@@ -140,7 +120,7 @@ public class InferenceRuputation {
                     int numberOfOutEgeFromSource = graph.outDegreeOf(source);
                     rep+=(source.getReputation()*weights.get(e.getID()).get(source.getID())/numberOfOutEgeFromSource);
                 }
-                rep = rep*dumpingFactor+(1-dumpingFactor);
+                rep = rep*dumpingFactor;
                 culmativediff += Math.abs(e.getReputation()-rep);
                 e.setReputation(rep);
             }
@@ -165,7 +145,9 @@ public class InferenceRuputation {
             edge.weight = weight;
         }
     }
-
+    public void exportGraph(String name){
+        graphiterator.exportGraph(name);
+    }
 
     private Set<EventEdge> getEdgeWithoutData(Set<EventEdge> edges){
         Set<EventEdge> set = new HashSet<>();
@@ -205,6 +187,7 @@ public class InferenceRuputation {
             return 1;
         }else{
             BigDecimal diff = POItime.subtract(edge.getEnd());
+            //System.out.println("Time diff is: "+ diff.toString());
             if(diff.compareTo(new BigDecimal(1))>0){
                 return 1/diff.doubleValue();
             }
@@ -213,6 +196,7 @@ public class InferenceRuputation {
                 System.out.println("timeWight should not be zero");
 
             }
+            if(res < 0.0) System.out.println("Minus TimeWeight:" + res);
             return res;
         }
     }
@@ -240,10 +224,12 @@ public class InferenceRuputation {
         for(Long id:  weights.keySet()){
             Map<Long, Double> sub = weights.get(id);
             for(Long id2: weights.keySet()){
-                writer.println(String.format("%d_%d : %f", id, id2, weights.get(id).get(id2)));
-                System.out.println(String.format("%d_%d : %f", id, id2, weights.get(id).get(id2)));
+                //writer.println(String.format("%d_%d : %f", id, id2, weights.get(id).get(id2)));
+                if(!weights.get(id).get(id2).equals(0.0)) {
+                    writer.println(String.format("%d_%d : %f", id, id2, weights.get(id).get(id2)));
+                    //System.out.println(String.format("%d_%d : %f", id, id2, weights.get(id).get(id2)));
+                }
             }
-            System.out.println(id);
         }
         writer.close();
     }
@@ -297,6 +283,43 @@ public class InferenceRuputation {
         }
         return false;
     }
+
+    public void initialReputation(String[] signature){
+        Set<EntityNode> set = graph.vertexSet();
+        Set<String> highReputation = new HashSet<String>(Arrays.asList(signature));
+        for(EntityNode node : set){
+            if(highReputation.contains(node.getSignature())){
+                node.reputation = 1.0;
+            }else if(graph.incomingEdgesOf(node).size() == 0){
+                node.reputation =0.0;
+            }
+        }
+
+    }
+
+    public void printConstantPartOfPageRank(){
+        double res = (1-dumpingFactor)/graph.vertexSet().size();
+        System.out.println("The constant part of Page Rank:" + res);
+    }
+
+    public void checkWeightsAfterCalculation(){
+        Set<EntityNode> vertexSet = graph.vertexSet();
+        for(EntityNode node : vertexSet){
+            Set<EventEdge> incoming = graph.incomingEdgesOf(node);
+            double res = 0.0;
+            for(EventEdge edge:incoming){
+                res += edge.weight;
+            }
+            if(incoming.size() != 0 && Math.abs(res-1.0) >=0.00001){
+                System.out.println("Target: "+ node.getSignature());
+                for(EventEdge edge :incoming){
+                    System.out.println(edge.getSource().getSignature());
+                }
+                System.out.println("-----------");
+            }
+        }
+    }
+
 
     public static void main(String[] args){
         String[] locapIPS = {"10.0.2.15"};
