@@ -122,4 +122,8 @@ public class EntityNode{
         result = 31 * result + signature.hashCode();
         return result;
     }
+    @Override
+    public String toString(){
+        return this.getID()+" "+this.getSignature();
+    }
 }

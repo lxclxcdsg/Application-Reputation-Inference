@@ -115,6 +115,11 @@ public class EventEdge{
         return this;
     }
 
+    public void printInfo(){
+        System.out.println("id: "+this.id+" Source:"+this.source.getSignature()+" Target:"+this.getSink().getSignature()+" End time:"+
+                this.endTime.toString()+" Size:"+ this.size);
+    }
+
     long getID(){return id;}
 
     public void setId(long id){
