@@ -71,7 +71,7 @@ public class InferenceRuputation {
                     //wtotal = totalWeightWithOutDataAmount(edges, timetotal);
                     for(EventEdge edge : edges){
                         EntityNode from = edge.getSource();
-                        double w = ((timeWeight(edge))/timetotal)*weight;
+                        double w = ((timeWeight(edge))/timetotal);
                         if(Double.isNaN(w)){
                             System.out.println("No data weight has NaN");
                         }
@@ -107,9 +107,10 @@ public class InferenceRuputation {
         Set<EntityNode> vertexSet = graph.vertexSet();
         double fluctuation = 1.0;
         int iterTime = 0;
-        while(fluctuation >= 0.000001){
+        while(fluctuation >= 0.0000000000001){
             double culmativediff = 0.0;
             iterTime++;
+            Map<Long, Double> preReputation = getReputation();
             for(EntityNode e: vertexSet){
                 Set<EventEdge> edges = graph.incomingEdgesOf(e);
                 if(edges.size() == 0) continue;
@@ -118,15 +119,24 @@ public class InferenceRuputation {
                 for(EventEdge edge: edges){
                     EntityNode source = edge.getSource();
                     int numberOfOutEgeFromSource = graph.outDegreeOf(source);
-                    rep+=(source.getReputation()*weights.get(e.getID()).get(source.getID())/numberOfOutEgeFromSource);
+                    rep+=(preReputation.get(source.getID())*weights.get(e.getID()).get(source.getID())/numberOfOutEgeFromSource);
                 }
-                rep = rep*dumpingFactor;
-                culmativediff += Math.abs(e.getReputation()-rep);
+                rep = rep*dumpingFactor+(1-dumpingFactor)/vertexSet.size();
+                culmativediff += Math.abs(rep-preReputation.get(e.getID()));
                 e.setReputation(rep);
             }
             fluctuation = culmativediff;
         }
         System.out.println(String.format("After %d times iteration, the reputation of each vertex is stable", iterTime));
+    }
+
+    private Map<Long, Double> getReputation(){
+        Set<EntityNode> vertexSet = graph.vertexSet();
+        Map<Long, Double> map = new HashMap<>();
+        for(EntityNode node:vertexSet){
+            map.put(node.getID(), node.getReputation());
+        }
+        return map;
     }
 
     private void getFinalWeights(){
@@ -313,7 +323,7 @@ public class InferenceRuputation {
             if(incoming.size() != 0 && Math.abs(res-1.0) >=0.00001){
                 System.out.println("Target: "+ node.getSignature());
                 for(EventEdge edge :incoming){
-                    System.out.println(edge.getSource().getSignature());
+                    edge.printInfo();
                 }
                 System.out.println("-----------");
             }
