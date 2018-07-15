@@ -142,16 +142,158 @@ public class IterateGraph {
         return res;
     }
     // the largest end time of POI vertex
-    public BigDecimal getLatestOperationTime(EntityNode node){
+    public BigDecimal getLatestOperationTime(EntityNode node) {
         assert node != null;
         Set<EventEdge> edges = inputgraph.incomingEdgesOf(node);
         BigDecimal res = BigDecimal.ZERO;
-        for(EventEdge e:edges){
-            if(res.compareTo(e.getEnd())<0){
+        for (EventEdge e : edges) {
+            if (res.compareTo(e.getEnd()) < 0) {
                 res = e.getStart();
             }
         }
         return res;
+    }
+
+    public List<DirectedPseudograph<EntityNode, EventEdge>> getHighWeightPaths(String s){
+        EntityNode start = getGraphVertex(s);
+        assert start != null;
+        List<DirectedPseudograph<EntityNode, EventEdge>> paths = new ArrayList<DirectedPseudograph<EntityNode, EventEdge>>();
+        for(int i=0; i<5; i++){
+            DirectedPseudograph<EntityNode, EventEdge> path = new DirectedPseudograph<EntityNode, EventEdge>(EventEdge.class);
+            Queue<EntityNode> queue = new LinkedList<>();
+            queue.offer(start);
+            Set<EntityNode> visited = new HashSet<>();
+            while(!queue.isEmpty()){
+                EntityNode cur = queue.poll();
+                visited.add(cur);
+                path.addVertex(cur);
+                Set<EventEdge> incoming = inputgraph.incomingEdgesOf(cur);
+                if(incoming.size() > 0){
+                    List<EventEdge> listOfIncoming = sortBasedOnWeight(incoming);
+                    if(listOfIncoming.size() == 1){
+                        EventEdge inc = listOfIncoming.get(0);
+                        path.addVertex(inc.getSource());
+                        path.addEdge(inc.getSource(), cur, inc);
+                        if(!visited.contains(inc.getSource()))
+                            queue.offer(inc.getSource());
+                    }else{
+                        EventEdge inc = listOfIncoming.get(0);
+                        if(!visited.contains(inc.getSource()))
+                            queue.offer(inc.getSource());
+                        path.addVertex(inc.getSource());
+                        path.addEdge(inc.getSource(), cur, inc);
+                        inputgraph.removeEdge(inc);
+                    }
+                }
+                Set<EventEdge> outgoing = inputgraph.outgoingEdgesOf(cur);
+                if(outgoing.size() > 0){
+                    List<EventEdge> listOfOutgoing = sortBasedOnWeight(outgoing);
+                    if(listOfOutgoing.size() == 1){
+                        EventEdge out = listOfOutgoing.get(0);
+                        path.addVertex(out.getSink());
+                        path.addEdge(cur, out.getSink(), out);
+                        if(!visited.contains(out.getSink()))
+                            queue.offer(out.getSink());
+
+                    }else{
+                        EventEdge out = listOfOutgoing.get(0);
+                        queue.offer(out.getSink());
+                        path.addVertex(out.getSink());
+                        path.addEdge(cur, out.getSink(), out);
+                        if(!visited.contains(out.getSink()))
+                            queue.offer(out.getSink());
+                        inputgraph.removeEdge(out);
+                    }
+                }
+            }
+            paths.add(path);
+        }
+        return paths;
+
+    }
+
+    public void printEdgesOfVertex(String s){
+        EntityNode vertex = getGraphVertex(s);
+        assert  vertex != null;
+        Set<EventEdge> incoming = inputgraph.incomingEdgesOf(vertex);
+        List<EventEdge> list = sortBasedOnWeight(incoming);
+        String fileName = "edgesOf"+s;
+        Set<EventEdge> outgoing = inputgraph.outgoingEdgesOf(vertex);
+        List<EventEdge> list2 = sortBasedOnWeight(outgoing);
+        try {
+            FileWriter writer = new FileWriter(fileName);
+            writer.write("Incoming: "+"\n");
+            for (int i = 0; i < list.size(); i++) {
+                String cur = outputEdge(list.get(i));
+                writer.write(cur+"\n");
+            }
+            writer.write("Outgoing: "+"\n");
+            for(int i=0; i< list2.size(); i++){
+                String cur = outputEdge(list.get(i));
+                writer.write(cur+"\n");
+            }
+            writer.close();
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String outputEdge(EventEdge e){
+        StringBuilder sb = new StringBuilder();
+        sb.append("source: ");
+        sb.append(e.getSource().getSignature()+" ");
+        sb.append("target: ");
+        sb.append(e.getSink().getSignature()+" ");
+        sb.append("weight: ");
+        sb.append(e.weight);
+        return sb.toString();
+    }
+
+    private List<EventEdge> sortBasedOnWeight(Set<EventEdge> edges){
+        List<EventEdge> list = new ArrayList<>(edges);
+        Comparator<EventEdge> cmp = new Comparator<EventEdge>() {
+            @Override
+            public int compare(EventEdge a, EventEdge b) {
+                double diff = b.weight - a.weight;
+                if (diff == 0){
+                    return 0;
+                }else if(diff > 0){
+                    return 1;
+                }else{
+                    return -1;
+                }
+            }
+        };
+
+        Collections.sort(list, cmp);
+        return list;
+    }
+
+    public double avergeEdgeWeight(){
+        int nums = inputgraph.edgeSet().size();
+        double sum = 0.0;
+        for(EventEdge edge : inputgraph.edgeSet()){
+            sum += edge.weight;
+        }
+        return sum/(nums*1.0);
+    }
+    /*this need to be tested*/
+    public void filterGraphBasedOnAverageWeight(){
+        double averageEdgeWeight = avergeEdgeWeight()/100.0;
+        List<EventEdge> edges = new ArrayList<>(inputgraph.edgeSet());
+        for(int i=0; i< edges.size(); i++){
+            if(edges.get(i).weight < averageEdgeWeight){
+                inputgraph.removeEdge(edges.get(i));
+            }
+        }
+        List<EntityNode> list = new ArrayList<>(inputgraph.vertexSet());
+        for(int i=0; i< list.size(); i++){
+            EntityNode v = list.get(i);
+            if(inputgraph.incomingEdgesOf(v).size() == 0 && inputgraph.outgoingEdgesOf(v).size() == 0){
+                inputgraph.removeVertex(v);
+            }
+        }
     }
 
 

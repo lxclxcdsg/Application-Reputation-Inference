@@ -1,16 +1,17 @@
 import org.jgrapht.graph.DirectedPseudograph;
 
 import java.sql.BatchUpdateException;
+import java.util.List;
 
 /**
  * Created by fang on 4/6/18.
  */
 public class ProcessOneLog {
     public static void main(String[] args){
-        String path = "/home/fang/pagerank/pagerank/pagerank/Data/Expdata2/aptgetInstallUnrar.txt";
+        String path = "/home/fang/pagerank/pagerank/pagerank/Data/Expdata2/aptgetInstallCurl.txt";
         String[]localIP = {"10.0.2.15"};
-        String detection = "/usr/bin/unrar-nonfree.dpkg-new";
-        String[] highRP = {"10.0.2.15:58268->91.189.91.26:80"};
+        String detection = "/usr/bin/curl.dpkg-new";
+        String[] highRP = {"10.0.2.15:52256->172.217.3.46:443"};
         process(path,localIP,detection,highRP);
 
 
@@ -36,7 +37,17 @@ public class ProcessOneLog {
 //            e.printStackTrace();
 //        }
         infer.checkWeightsAfterCalculation();
-        infer.exportGraph("UnrarReputation");
+        infer.exportGraph("instllCurl");
+        IterateGraph iterGraph = new IterateGraph(infer.graph);
+        iterGraph.filterGraphBasedOnAverageWeight();
+        iterGraph.exportGraph("FilteredInstallCural");
+        List<DirectedPseudograph<EntityNode, EventEdge>> paths = iterGraph.getHighWeightPaths(detection);
+        for(int i=0; i< paths.size();i++){
+            IterateGraph iter = new IterateGraph(paths.get(i));
+            String fileName = String.valueOf(i) + "path";
+            iter.exportGraph(fileName);
+        }
+        iterGraph.printEdgesOfVertex("11035dpkg");
 
 
     }
