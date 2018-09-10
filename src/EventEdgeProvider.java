@@ -8,6 +8,6 @@ public class EventEdgeProvider implements ComponentNameProvider<EventEdge> {
 
     @Override
     public String getName(EventEdge eventEdge) {
-        return  eventEdge.id+" "+eventEdge.weight;
+        return  eventEdge.id+" "+ eventEdge.weight;                   //no weights
     }
 }

@@ -1,7 +1,13 @@
 /*The function here include bfs and output methods*/
 
 
+import org.jgrapht.Graph;
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.interfaces.KShortestPathAlgorithm;
+import org.jgrapht.alg.shortestpath.KShortestPaths;
 import org.jgrapht.ext.DOTExporter;
+import org.jgrapht.graph.AsGraphUnion;
+import org.jgrapht.graph.AsUndirectedGraph;
 import org.jgrapht.graph.DirectedPseudograph;
 
 import java.io.File;
@@ -15,12 +21,16 @@ import java.util.*;
 public class IterateGraph {
     DirectedPseudograph<EntityNode, EventEdge> inputgraph;
     DOTExporter<EntityNode, EventEdge> exporter;
-
+    Map<String, EntityNode> indexOfNode;
 
     IterateGraph(DirectedPseudograph<EntityNode, EventEdge> graph){
 
         this.inputgraph = graph;
         exporter = new DOTExporter<EntityNode, EventEdge>(new EntityIdProvider(),new EntityNameProvider(), new EventEdgeProvider(),new EntityAttributeProvider(),null);
+        indexOfNode = new HashMap<>();
+        for(EntityNode n : graph.vertexSet()){
+            indexOfNode.put(n.getSignature(), n);
+        }
     }
 
     public DirectedPseudograph<EntityNode, EventEdge> bfs(String input){
@@ -89,12 +99,15 @@ public class IterateGraph {
     }
 
     public EntityNode getGraphVertex(String input){
-        Set<EntityNode> vertexSet = inputgraph.vertexSet();
-        for(EntityNode n:vertexSet){
-            System.out.println(n.getSignature());
-            if(n.getSignature().equals(input)){
-                return n;
-            }
+//        Set<EntityNode> vertexSet = inputgraph.vertexSet();
+//        for(EntityNode n:vertexSet){
+//            System.out.println(n.getSignature());
+//            if(n.getSignature().equals(input)){
+//                return n;
+//            }
+//        }
+        if(indexOfNode.containsKey(input)){
+            return indexOfNode.get(input);
         }
         System.out.println("Can't find the vertex");
         return null;
@@ -129,6 +142,31 @@ public class IterateGraph {
         }
     }
 
+    public void printPathsOfSpecialVertex(String vertex)
+    {
+        EntityNode v1 = getGraphVertex(vertex);
+        assert v1!=null;
+        Set<EventEdge> outgoing = inputgraph.outgoingEdgesOf(v1);
+        Set<EventEdge> incoming = inputgraph.incomingEdgesOf(v1);
+        List<EventEdge> list = new ArrayList<>(outgoing);
+        sortEdgesBasedOnWeight(list);
+        List<EventEdge> list2 =  new ArrayList<>(incoming);
+        sortEdgesBasedOnWeight(list2);
+        try{
+            FileWriter w = new FileWriter(new File(String.format("%s.txt",vertex)));
+            for(int i=0; i< list.size(); i++){
+                EventEdge edge = list.get(i);
+                w.write("Target: " + edge.getSink().getSignature() + " Data: " + edge.getSize() + " Weight: "+ edge.weight+ System.lineSeparator());
+            }
+            for(int i=0;i< list2.size(); i++){
+                EventEdge edge = list2.get(i);
+                w.write("Source: "+ edge.getSource().getSignature()+" Data: " + edge.getSize()+" Weiget: "+edge.weight+System.lineSeparator());
+            }
+            w.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     public BigDecimal getLatestOperationTime(String str){
         EntityNode vertex = getGraphVertex(str);
         assert vertex != null;
@@ -140,6 +178,34 @@ public class IterateGraph {
             }
         }
         return res;
+    }
+
+    public void OutputPaths(List<GraphPath<EntityNode, EventEdge>> paths){
+        System.out.println("Paths size:" + paths.size());
+        for(int i=0; i<paths.size(); i++){
+            Graph<EntityNode, EventEdge> g = paths.get(i).getGraph();
+            String fileName = String.format("Path %d.dot", i);
+            try{
+                exporter.exportGraph(g, new FileWriter(new File(fileName)));
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void sortEdgesBasedOnWeight(List<EventEdge> edges){
+        Comparator<EventEdge> cp= new Comparator<EventEdge>() {
+            @Override
+            public int compare(EventEdge a, EventEdge b) {
+                if(a.weight >= b.weight){
+                    return 1;
+                }else{
+                    return 0;
+                }
+            }
+        };
+
+        Collections.sort(edges, cp);
     }
     // the largest end time of POI vertex
     public BigDecimal getLatestOperationTime(EntityNode node) {
@@ -295,6 +361,7 @@ public class IterateGraph {
             }
         }
     }
+
 
 
 }

@@ -1,3 +1,5 @@
+import org.jgrapht.Graph;
+import org.jgrapht.GraphPath;
 import org.jgrapht.graph.DirectedPseudograph;
 
 import java.sql.BatchUpdateException;
@@ -26,28 +28,30 @@ public class ProcessOneLog {
         backTrack.exportGraph("backTrack");
         CasualityPreserve CPR = new CasualityPreserve(backTrack.afterBackTrack);
         CPR.CPR();
+//        GraphConnectivity connectivity = new GraphConnectivity(CPR.afterMerge);
+//        connectivity.testStrongConn("Connectivity.txt");
+//        connectivity.testWeakConnectivity("WeakConnectivity.txt");
         InferenceRuputation infer = new InferenceRuputation(CPR.afterMerge);
         infer.calculateWeights();
         infer.initialReputation(highRP);
         infer.PageRankIteration();
-        //infer.printConstantPartOfPageRank();
-//        try {
-//            infer.printWeights();
-//        }catch ( Exception e){
-//            e.printStackTrace();
-//        }
-        infer.checkWeightsAfterCalculation();
+        //infer.onlyPrintHeightestWeights(detection);
+        IterateGraph iter = new IterateGraph(infer.graph);
         infer.exportGraph("instllCurl");
         IterateGraph iterGraph = new IterateGraph(infer.graph);
         iterGraph.filterGraphBasedOnAverageWeight();
         iterGraph.exportGraph("FilteredInstallCural");
-        List<DirectedPseudograph<EntityNode, EventEdge>> paths = iterGraph.getHighWeightPaths(detection);
-        for(int i=0; i< paths.size();i++){
-            IterateGraph iter = new IterateGraph(paths.get(i));
-            String fileName = String.valueOf(i) + "path";
-            iter.exportGraph(fileName);
-        }
+//        List<DirectedPseudograph<EntityNode, EventEdge>> paths = iterGraph.getHighWeightPaths(detection);
+//        for(int i=0; i< paths.size();i++){
+//            IterateGraph iter = new IterateGraph(paths.get(i));
+//            String fileName = String.valueOf(i) + "path";
+//            iter.exportGraph(fileName);
+//        }
         iterGraph.printEdgesOfVertex("11035dpkg");
+
+//        infer.checkWeightsAfterCalculation();
+//        infer.exportGraph("UnrarReputation");
+
 
 
     }

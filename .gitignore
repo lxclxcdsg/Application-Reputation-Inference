@@ -4,3 +4,8 @@ midtermReport/main.blg
 midtermReport/main.log
 midtermReport/main.pdf
 midtermReport/main.synctex.gz
+out/
+Data/
+*.dot
+*.svg
+*.txts

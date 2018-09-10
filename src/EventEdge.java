@@ -77,6 +77,7 @@ public class EventEdge{
         this.endTime = edge.getEnd();
         this.type = edge.getType();
         this.size = edge.getSize();
+        this.weight = edge.weight;
     }
 
     public EventEdge(String type, BigDecimal starttime, BigDecimal endtime, long amount, EntityNode from, EntityNode to, long id){
@@ -178,6 +179,10 @@ public class EventEdge{
 //        result = 31 * result + endTime.hashCode();
         return result;
     }
+
+//    public String printInfo(){
+//        return this.source.getSignature() + " to "+ this.sink.getSignature()+" "+this.getSize();
+//    }
 
 
 }
