@@ -3,19 +3,12 @@
 
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
-import org.jgrapht.alg.interfaces.KShortestPathAlgorithm;
-import org.jgrapht.alg.shortestpath.KShortestPaths;
 import org.jgrapht.ext.DOTExporter;
-import org.jgrapht.graph.AsGraphUnion;
-import org.jgrapht.graph.AsUndirectedGraph;
 import org.jgrapht.graph.DirectedPseudograph;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.*;
 
 public class IterateGraph {
@@ -362,6 +355,33 @@ public class IterateGraph {
         }
     }
 
+    public void filterGraphBasedOnVertexReputation(){
+        List<EntityNode> vlist = new ArrayList<>(inputgraph.vertexSet());
+        for(int i=0;i<vlist.size(); i++){
+            EntityNode v = vlist.get(i);
+            if(v.reputation == 0.0){
+                List<EventEdge> inc = new ArrayList<>(inputgraph.incomingEdgesOf(v));
+                for(int j=0; j< inc.size();j++){
+                    inputgraph.removeEdge(inc.get(j));
+                }
+                List<EventEdge> out = new ArrayList<>(inputgraph.outgoingEdgesOf(v));
+                for(int j=0; j<out.size(); j++){
+                    inputgraph.removeEdge(out.get(j));
+                }
+                inputgraph.removeVertex(v);
+            }
+        }
+    }
+
+    public void removeSingleVertex(){
+        List<EntityNode> list = new ArrayList<>(inputgraph.vertexSet());
+        for(int i=0; i< list.size(); i++){
+            EntityNode v = list.get(i);
+            if(inputgraph.incomingEdgesOf(v).size() == 0 && inputgraph.outgoingEdgesOf(v).size() == 0){
+                inputgraph.removeVertex(v);
+            }
+        }
+    }
 
 
 }

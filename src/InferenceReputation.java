@@ -1,16 +1,14 @@
-import com.sun.org.apache.xpath.internal.SourceTree;
 import org.jgrapht.graph.DirectedPseudograph;
-import org.jgrapht.traverse.GraphIterator;
+import org.jgrapht.alg.*;
 
 /**
  * Created by fang on 3/12/18.
  */
 import java.io.PrintWriter;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 
-public class InferenceRuputation {
+public class InferenceReputation {
     //GraphSplit splitedGraph;
     DirectedPseudograph<EntityNode, EventEdge> graph;
     /* the input  need to finish split step before this(this parameter need to run relevent funtions first)*/
@@ -19,7 +17,7 @@ public class InferenceRuputation {
     HashMap<Long, HashMap<Long, Double>> weights;
     double weight; // used to calculate combinative weight
     double dumpingFactor;
-    InferenceRuputation(DirectedPseudograph<EntityNode, EventEdge> input){
+    InferenceReputation(DirectedPseudograph<EntityNode, EventEdge> input){
         //splitedGraph = s;
         graph = input;
         graphiterator = new IterateGraph(graph);
@@ -57,16 +55,18 @@ public class InferenceRuputation {
 
                 for (EventEdge i : edges) {
                     EntityNode from = i.getSource();
-                    wtotal += (1/3.0)*(timeWeight(i) / timetotal) + (1/3.0)*(amountWeight(i) / amounttotal)+
-                            (1/3.0)*(getEdgeWeight(i)/totalWeightBasedOnEdgeNumber);  // here is issue some process amounttotal is zero
+//                    wtotal += (1/3.0)*(timeWeight(i) / timetotal) + (1/3.0)*(amountWeight(i) / amounttotal)+
+//                            (1/3.0)*(getEdgeWeight(i)/totalWeightBasedOnEdgeNumber);  // here is issue some process amounttotal is zero
+                    wtotal += getCombineWeight(i, timetotal, amounttotal, totalWeightBasedOnEdgeNumber);
                 }
                 if(Double.isNaN(wtotal)){
                     System.out.println("Common case total weight is NaN");
                 }
                 for (EventEdge edge : edges) {
                     EntityNode from = edge.getSource();
-                    double w = ((1/3.0)*(timeWeight(edge)/timetotal)+(1/3.0)*(amountWeight(edge))/amounttotal+
-                            (1/3.0)*(getEdgeWeight(edge)/totalWeightBasedOnEdgeNumber))/wtotal;
+//                    double w = ((1/3.0)*(timeWeight(edge)/timetotal)+(1/3.0)*(amountWeight(edge))/amounttotal+
+//                            (1/3.0)*(getEdgeWeight(edge)/totalWeightBasedOnEdgeNumber))/wtotal;
+                    double w = getCombineWeight(edge, timetotal,amounttotal,totalWeightBasedOnEdgeNumber)/wtotal;
 //                    double testForEdge = (1/3)*(getEdgeWeight(edge)/totalWeightBasedOnEdgeNumber)/wtotal;
 //                    if(Double.isNaN(testForEdge)){
 //                        System.out.println("Tst for edge is NAN");
@@ -78,7 +78,6 @@ public class InferenceRuputation {
                     if(totalWeightBasedOnEdgeNumber == 0.0){
                         System.out.println("In common case totalWeigtBaseOnEdge is 0.0");
                     }
-
                     if(Double.isNaN(w)){
                         System.out.println("Common case weight is Nan");
                     }
@@ -104,8 +103,9 @@ public class InferenceRuputation {
                     System.out.println("Some has data some doesnt :"+ edges.size());
                     for(EventEdge i : edges){
                         EntityNode from = i.getSource();
-                        wtotal += (1/3.0)*(timeWeight(i) / timetotal) + (1/3.0)*(amountWeight(i) / amounttotal)+
-                                (1/3.0)*(getEdgeWeight(i)/totalWeightBasedOnEdgeNumber);
+//                        wtotal += (1/3.0)*(timeWeight(i) / timetotal) + (1/3.0)*(amountWeight(i) / amounttotal)+
+//                                (1/3.0)*(getEdgeWeight(i)/totalWeightBasedOnEdgeNumber);
+                        wtotal += getCombineWeight(i, timetotal, amounttotal, totalWeightBasedOnEdgeNumber);
                     }
                     if(Double.isNaN(wtotal)){
                         System.out.println("Some edge having data total weight is NaN");
@@ -114,8 +114,9 @@ public class InferenceRuputation {
 
                         double w= 0.0;
                         EntityNode from = edge.getSource();
-                        w = ((1/3.0)*(timeWeight(edge) / timetotal) +(1/3.0)* (amountWeight(edge) / amounttotal)+
-                                (1/3.0)*(getEdgeWeight(edge)/totalWeightBasedOnEdgeNumber)) / wtotal;
+//                        w = ((1/3.0)*(timeWeight(edge) / timetotal) +(1/3.0)* (amountWeight(edge) / amounttotal)+
+//                                (1/3.0)*(getEdgeWeight(edge)/totalWeightBasedOnEdgeNumber)) / wtotal;
+                        w = getCombineWeight(edge, timetotal, amounttotal, totalWeightBasedOnEdgeNumber)/wtotal;
                         edge.weight = w;
                         weights.get(e.getID()).put(from.getID(), w);
                     }
@@ -124,6 +125,117 @@ public class InferenceRuputation {
 
 
 
+        }
+    }
+
+    private double getCombineWeight(EventEdge e, double timetotal, double amounttotal, double edgetotal){
+        return (0.1)*(timeWeight(e)/timetotal)+(0.4)*(amountWeight(e))/amounttotal+
+                (0.5)*(getEdgeWeight(e)/edgetotal);
+    }
+
+    public void calculateWeight(String input){
+        Set<EntityNode> vertexSet = graph.vertexSet();
+        long data = getDataAmount(input);
+        initalizeWeights();
+        for(EntityNode e: vertexSet){
+            Set<EventEdge> edges = graph.incomingEdgesOf(e);
+            double[] timeweights = new double[edges.size()];
+            double[] amountweights = new double[edges.size()];
+            boolean nodata = false;
+            double amounttotal = 0;
+            double amountWeightTotal = 0.0;
+            double timetotal = 0.0;
+            double totalWeightBasedOnEdgeNumber = 0.0;
+            for(EventEdge i:edges){
+                amounttotal += i.getSize();
+                amountWeightTotal = weightSimilar(i.getSize(), data);
+                timetotal += timeWeight(i);
+                totalWeightBasedOnEdgeNumber += getEdgeWeight(i);
+            }
+            //System.out.println("totalWeightBasedOnEdgeNumber is:" + String.valueOf(totalWeightBasedOnEdgeNumber));
+            assert totalWeightBasedOnEdgeNumber!=0.0 && totalWeightBasedOnEdgeNumber!=Double.NaN;
+            if(amounttotal == 0) nodata = true;
+            boolean someHasData = someEdgesWithoutData(graph.incomingEdgesOf(e));
+
+            double wtotal = 0.0;
+            if(!nodata && !someHasData) {
+
+                for (EventEdge i : edges) {
+                    EntityNode from = i.getSource();
+                    wtotal += (1/3.0)*(timeWeight(i) / timetotal) + (1/3.0)*(weightSimilar(i.getSize(), data) / amountWeightTotal)+
+                            (1/3.0)*(getEdgeWeight(i)/totalWeightBasedOnEdgeNumber);  // here is issue some process amounttotal is zero
+                }
+                if(Double.isNaN(wtotal)){
+                    System.out.println("Common case total weight is NaN");
+                }
+                for (EventEdge edge : edges) {
+                    EntityNode from = edge.getSource();
+//                    double w = ((1/3.0)*(timeWeight(edge)/timetotal)+(1/3.0)*(weightSimilar(edge.getSize(), data))/amountWeightTotal+
+//                            (1/3.0)*(getEdgeWeight(edge)/totalWeightBasedOnEdgeNumber))/wtotal;
+                    double w = (0.2*(timeWeight(edge)/timetotal)+0.4*(weightSimilar(edge.getSize(), data))/amountWeightTotal+
+                            0.4*(getEdgeWeight(edge)/totalWeightBasedOnEdgeNumber))/wtotal;
+                    if(Double.isNaN(getEdgeWeight(edge))){
+                        System.out.println("single edge weight is NAN");
+                    }
+                    if(totalWeightBasedOnEdgeNumber == 0.0){
+                        System.out.println("In common case totalWeigtBaseOnEdge is 0.0");
+                    }
+
+                    if(Double.isNaN(w)){
+                        System.out.println("Common case weight is Nan");
+                    }
+                    edge.weight = w;
+                    weights.get(e.getID()).put(from.getID(), w);
+                }
+            }else{
+                if(nodata){
+                    //wtotal = totalWeightWithOutDataAmount(edges, timetotal);
+                    for(EventEdge edge: edges){
+                        wtotal += 0.4*(timeWeight(edge)/timetotal) + 0.6*(getEdgeWeight(edge)/totalWeightBasedOnEdgeNumber);
+                    }
+                    for(EventEdge edge : edges){
+                        EntityNode from = edge.getSource();
+                        double w = (0.4*(timeWeight(edge))/timetotal+0.6*(getEdgeWeight(edge)/totalWeightBasedOnEdgeNumber))/wtotal;
+                        if(Double.isNaN(w)){
+                            System.out.println("No data weight has NaN");
+                        }
+                        edge.weight = w;
+                        weights.get(e.getID()).put(from.getID(), w);
+                    }
+                }else{
+                    System.out.println("Some has data some doesnt :"+ edges.size());
+                    for(EventEdge i : edges){
+                        EntityNode from = i.getSource();
+                        wtotal += (0.2)*(timeWeight(i) / timetotal) + (0.4)*(weightSimilar(i.getSize(), data) / amountWeightTotal)+
+                                (0.4)*(getEdgeWeight(i)/totalWeightBasedOnEdgeNumber);
+                    }
+                    if(Double.isNaN(wtotal)){
+                        System.out.println("Some edge having data total weight is NaN");
+                    }
+                    for(EventEdge edge : edges){
+
+                        double w= 0.0;
+                        EntityNode from = edge.getSource();
+                        w = (0.2*(timeWeight(edge) / timetotal) +(0.4)* (weightSimilar(edge.getSize(), data) / amountWeightTotal)+
+                                (0.4)*(getEdgeWeight(edge)/totalWeightBasedOnEdgeNumber)) / wtotal;
+                        edge.weight = w;
+                        weights.get(e.getID()).put(from.getID(), w);
+                    }
+                }
+            }
+
+
+
+        }
+    }
+
+    private double weightSimilar(long cur, long targets){
+        if(cur == targets){
+            return 1.0;
+        }else if(cur > targets){
+            return (double)targets/cur;
+        }else{
+            return (double)cur/targets;
         }
     }
 
@@ -169,23 +281,76 @@ public class InferenceRuputation {
             double culmativediff = 0.0;
             iterTime++;
             Map<Long, Double> preReputation = getReputation();
-            for(EntityNode e: vertexSet){
-                Set<EventEdge> edges = graph.incomingEdgesOf(e);
+            for(EntityNode v: vertexSet){
+                Set<EventEdge> edges = graph.incomingEdgesOf(v);
                 if(edges.size() == 0) continue;
-
                 double rep = 0.0;
                 for(EventEdge edge: edges){
                     EntityNode source = edge.getSource();
                     int numberOfOutEgeFromSource = graph.outDegreeOf(source);
-                    rep+=(preReputation.get(source.getID())*weights.get(e.getID()).get(source.getID())/numberOfOutEgeFromSource);
+//                    double total_weight = 0.0;
+//                    for (EventEdge oe:graph.outgoingEdgesOf(source)){
+//                        total_weight += weights.get(graph.getEdgeTarget(oe).getID()).get(source.getID());
+//                    }
+                    rep+=(preReputation.get(source.getID())*weights.get(v.getID()).get(source.getID())/1);
                 }
                 rep = rep*dumpingFactor+(1-dumpingFactor)/vertexSet.size();
-                culmativediff += Math.abs(rep-preReputation.get(e.getID()));
-                e.setReputation(rep);
+                culmativediff += Math.abs(rep-preReputation.get(v.getID()));
+                v.setReputation(rep);
             }
             fluctuation = culmativediff;
         }
         System.out.println(String.format("After %d times iteration, the reputation of each vertex is stable", iterTime));
+    }
+
+    public void PageRankIteration2(String[] highRP, String[] lowRP){
+        double dumpingFactor = 0.9;
+        Set<EntityNode> vertexSet = graph.vertexSet();
+        Set<String> sources = new HashSet<>(Arrays.asList(highRP));
+        sources.addAll(Arrays.asList(lowRP));
+        double fluctuation = 1.0;
+        int iterTime = 0;
+        while(fluctuation >= 0.0000000000001){
+            double culmativediff = 0.0;
+            iterTime++;
+            Map<Long, Double> preReputation = getReputation();
+            for(EntityNode v: vertexSet){
+                if(sources.contains(v.getSignature())) continue;
+                Set<EventEdge> edges = graph.incomingEdgesOf(v);
+                if(edges.size() == 0) continue;
+                double rep = 0.0;
+                for(EventEdge edge: edges){
+                    EntityNode source = edge.getSource();
+                    int numberOfOutEgeFromSource = graph.outDegreeOf(source);
+//                    double total_weight = 0.0;
+//                    for (EventEdge oe:graph.outgoingEdgesOf(source)){
+//                        total_weight += weights.get(graph.getEdgeTarget(oe).getID()).get(source.getID());
+//                    }
+                    rep+=(preReputation.get(source.getID())*weights.get(v.getID()).get(source.getID())/1);
+                }
+                rep = rep*dumpingFactor;
+                culmativediff += Math.abs(rep-preReputation.get(v.getID()));
+                v.setReputation(rep);
+            }
+            fluctuation = culmativediff;
+        }
+        System.out.println(String.format("After %d times iteration, the reputation of each vertex is stable", iterTime));
+    }
+
+    protected void fixReputation(String[] highRP){
+        Map<Long, Double> reputation = getReputation();
+        Set<String> s = new HashSet<>(Arrays.asList(highRP));
+        double high_rep = 0.0;
+        int count = 0;
+        for(EntityNode v: graph.vertexSet()){
+            if(s.contains(v.getSignature())) {
+                high_rep += reputation.get(v.getID());
+                count++;
+            }
+        }
+        high_rep /= count;
+        for(EntityNode v: graph.vertexSet())
+            v.setReputation(Math.min(1-(high_rep-reputation.get(v.getID()))/high_rep,1));
     }
 
     private Map<Long, Double> getReputation(){
@@ -352,13 +517,20 @@ public class InferenceRuputation {
         return false;
     }
 
-    public void initialReputation(String[] signature){
+    public void initialReputation(String[] signature_high, String[] signature_neutral, String[] signature_low){
         Set<EntityNode> set = graph.vertexSet();
-        Set<String> highReputation = new HashSet<String>(Arrays.asList(signature));
-        for(EntityNode node : set){
-            if(highReputation.contains(node.getSignature())){
+        Set<String> highReputation = new HashSet<String>(Arrays.asList(signature_high));
+        Set<String> midReputation = new HashSet<String>(Arrays.asList(signature_neutral));
+        Set<String> lowReputation = new HashSet<String>(Arrays.asList(signature_low));
+        for(EntityNode node : set) {
+            if(highReputation.contains(node.getSignature())) {
+                System.out.println(node.getSignature()+" has high reputation");
                 node.reputation = 1.0;
-            }else if(graph.incomingEdgesOf(node).size() == 0){
+            }else if(midReputation.contains(node.getSignature())) {
+                node.reputation = 0.5;
+            }else if(lowReputation.contains(node.getSignature())) {
+                node.reputation = -1.0;
+            }else if(graph.incomingEdgesOf(node).size() == 0) {
                 node.reputation =0.0;
             }
         }
@@ -454,6 +626,132 @@ public class InferenceRuputation {
         return sources;
     }
 
+    public double avergeEdgeWeight(){
+        int nums = graph.edgeSet().size();
+        double sum = 0.0;
+        for(EventEdge edge : graph.edgeSet()){
+            sum += edge.weight;
+        }
+        System.out.println("average weight: "+sum/(nums*1.0));
+        return sum/(nums*1.0);
+    }
+
+    public double sdEdgeWeight(double average){
+        int nums = graph.edgeSet().size();
+        double sd = 0.0;
+        for(EventEdge edge : graph.edgeSet()){
+            double diff = edge.weight-average;
+            sd+=diff*diff;
+        }
+        System.out.println("standard deviation: "+Math.sqrt(sd/(1.0*(nums-1))));
+        return Math.sqrt(sd/(1.0*(nums-1)));
+    }
+
+    /*this need to be tested*/
+    public void filterGraphBasedOnAverageWeight(){
+        double averageEdgeWeight = avergeEdgeWeight();
+        double sd = sdEdgeWeight(averageEdgeWeight);
+        List<EventEdge> edges = new ArrayList<>(graph.edgeSet());
+        double threshold = 0.138;//averageEdgeWeight/5;
+        System.out.println("threshold: "+threshold);
+        for(int i=0; i< edges.size(); i++){
+
+            if(edges.get(i).weight < threshold){
+                graph.removeEdge(edges.get(i));
+            }
+        }
+        List<EntityNode> list = new ArrayList<>(graph.vertexSet());
+        for(int i=0; i< list.size(); i++){
+            EntityNode v = list.get(i);
+            if(graph.incomingEdgesOf(v).size() == 0 && graph.outgoingEdgesOf(v).size() == 0){
+                graph.removeVertex(v);
+            }
+        }
+    }
+
+    public double OTSUThreshold(){
+        List<Double> weights  = new ArrayList<>();
+        for(EventEdge e: graph.edgeSet())
+            weights.add(e.weight);
+        Collections.sort(weights);
+
+        double min_sigma = Double.MAX_VALUE, sum = 0.0;
+        int min_i = 0, length = weights.size();
+        for(int i = 0; i < length; i++) sum += weights.get(i);
+        double sum1 = 0.0;
+        for(int i = 0; i< length; i++) {
+            sum1+=weights.get(i);
+            double avg1 = sum1/(i+1);
+            double avg2 = (sum-sum1)/(length-i-1);
+            double sigma1 = 0.0, sigma2 = 0.0;
+            for(int j = 0; j <= i; j++)
+                sigma1 += Math.pow(weights.get(i)-avg1,2.0);
+            for(int j = i+1; j < length; j++)
+                sigma2 += Math.pow(weights.get(i)-avg2,2.0);
+            if(sigma1+sigma2 < min_sigma){
+                min_sigma = sigma1 + sigma2;
+                min_i = i;
+            }
+        }
+        return weights.get(min_i);
+    }
+
+    public void removeIsolatedIslands(String POI){
+        ConnectivityInspector ci = new ConnectivityInspector(graph);
+        Set verticesConnectedToPOI = ci.connectedSetOf(graphiterator.getGraphVertex(POI));
+        List<EntityNode> list = new ArrayList<>(graph.vertexSet());
+        for(int i=0; i< list.size(); i++){
+            EntityNode v = list.get(i);
+            if(!verticesConnectedToPOI.contains(v)){
+                graph.removeVertex(v);
+            }
+        }
+    }
+
+    public void removeIrrelaventVertices(String POI){
+        EntityNode POIVertex = graphiterator.getGraphVertex(POI);
+        LinkedList<EventEdge> queue = new LinkedList<>(graph.incomingEdgesOf(POIVertex));
+        Set<EntityNode> ancestors = new HashSet<>();
+        ancestors.add(POIVertex);
+        while(!queue.isEmpty()){
+            EntityNode v = graph.getEdgeSource(queue.pollLast());
+            ancestors.add(v);
+            for(EventEdge e:graph.incomingEdgesOf(v))
+                if(!ancestors.contains(graph.getEdgeSource(e)))
+                    queue.addFirst(e);
+        }
+
+        queue = new LinkedList<>(graph.outgoingEdgesOf(POIVertex));
+        Set<EntityNode> children = new HashSet<>();
+        children.add(POIVertex);
+        while(!queue.isEmpty()){
+            EntityNode v = graph.getEdgeTarget(queue.pollLast());
+            children.add(v);
+            for(EventEdge e:graph.outgoingEdgesOf(v))
+                if(!children.contains(graph.getEdgeTarget(e)))
+                    queue.addFirst(e);
+        }
+
+        ancestors.addAll(children);
+        List<EntityNode> list = new ArrayList<>(graph.vertexSet());
+        for(int i=0; i< list.size(); i++){
+            EntityNode v = list.get(i);
+            if(!ancestors.contains(v)){
+                graph.removeVertex(v);
+            }
+        }
+
+    }
+
+    public long getDataAmount(String signature){
+        EntityNode node = graphiterator.getGraphVertex(signature);
+        long res = 0;
+        Set<EventEdge> edges = graph.incomingEdgesOf(node);
+        for(EventEdge e:edges){
+            res += e.getSize();
+        }
+        return res;
+    }
 
     public static void main(String[] args){
         String[] locapIPS = {"10.0.2.15"};
@@ -463,7 +761,7 @@ public class InferenceRuputation {
         pGraph.CPR();
         GraphSplit splitGraph = new GraphSplit(pGraph.afterCPR);
         splitGraph.splitGraph();
-        InferenceRuputation test = new InferenceRuputation(splitGraph.inputGraph);
+        InferenceReputation test = new InferenceReputation(splitGraph.inputGraph);
         String[] entityWithHighReputation = {"10.0.2.15:58250->91.189.91.26:80"};
         test.setReliableReputation(entityWithHighReputation);
         try {

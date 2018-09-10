@@ -1,12 +1,11 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
-import java.math.BigDecimal;
-import java.util.regex.*;
 
 /**
  * Created by fang on 6/13/17.
@@ -63,9 +62,9 @@ public class SysdigOutputParser {
         FtoP = new HashSet<>();
         PtoN = new HashSet<>();
         NtoP = new HashSet<>();
-        String[] ptopSystemCall = {"clone"};
+        String[] ptopSystemCall = {"clone","execve"};
         String[] ptofSystemCall ={"write","writev"};
-        String[] ftopSystemCall = {"read","readv"};
+        String[] ftopSystemCall = {"read","readv","openat","fstat","close"};
         String[] ptonSystemCall = {"recvmsg","sendto","read","write","writev"};
         String[] ntopSystemCal = {"write","writev","recvmsg","sendto","read"};
         for(String str:ptopSystemCall){
@@ -299,7 +298,7 @@ public class SysdigOutputParser {
                         //System.out.println("latency is: "+latency);
                     }
                     if (event.equals("clone") && parts[i].startsWith("res")) {
-                        String childProcess = parts[i].substring(3);
+                        String childProcess = parts[i].substring(4);
                         String[] childAndName = childProcess.split("\\(");
                         if (childAndName.length >= 2) {
                             pid2 = childAndName[0];
@@ -475,7 +474,7 @@ public class SysdigOutputParser {
         }
     }
 
-    private void addProcessToProcessEvent(String pid,String name, String timestamp1, String timestamp2,String event,long id){
+    private void addProcessToProcessEvent(String pid, String name, String timestamp1, String timestamp2,String event,long id){
         Process source = processHashMap.get(pid+name);
         String start = timestamp1+"."+timestamp2;
         PtoPEvent pp = new PtoPEvent("Process To Process",timestamp1,timestamp2,source,null,event,id);

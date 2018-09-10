@@ -1,15 +1,8 @@
 /**
  * Created by fang on 8/11/17.
  */
-import com.sun.org.apache.xpath.internal.SourceTree;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import org.jgrapht.ext.DOTExporter;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.DirectedMultigraph;
 import org.jgrapht.graph.DirectedPseudograph;
-import org.jgrapht.alg.interfaces.MinimumVertexCoverAlgorithm.VertexCoverImpl;
-import org.junit.experimental.theories.internal.ParameterizedAssertionError;
-import java.math.BigDecimal;
 
 import java.io.FileWriter;
 import java.io.IOException;
