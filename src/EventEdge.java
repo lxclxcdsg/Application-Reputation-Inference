@@ -13,6 +13,9 @@ public class EventEdge{
     private String event;
     private long size;
     public double weight;
+    public double timeWeight;
+    public double amountWeight;
+    public double structureWeight;
 
     EventEdge(PtoFEvent pf){
         source = new EntityNode(pf.getSource());

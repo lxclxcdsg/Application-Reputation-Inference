@@ -37,17 +37,21 @@ public class InferenceReputation {
             double[] timeweights = new double[edges.size()];
             double[] amountweights = new double[edges.size()];
             boolean nodata = false;
-            double amounttotal = 0;
+            double amounttotal = 0.0;
             double timetotal = 0.0;
             double totalWeightBasedOnEdgeNumber = 0.0;
             for(EventEdge i:edges){
+                i.amountWeight = i.getSize();
+                i.timeWeight = timeWeight(i);
+                i.structureWeight = getEdgeWeight(i);
                 amounttotal += i.getSize();
                 timetotal += timeWeight(i);
                 totalWeightBasedOnEdgeNumber += getEdgeWeight(i);
+
             }
             //System.out.println("totalWeightBasedOnEdgeNumber is:" + String.valueOf(totalWeightBasedOnEdgeNumber));
             assert totalWeightBasedOnEdgeNumber!=0.0 && totalWeightBasedOnEdgeNumber!=Double.NaN;
-            if(amounttotal == 0) nodata = true;
+            if(amounttotal < 10e-5) nodata = true;
             boolean someHasData = someEdgesWithoutData(graph.incomingEdgesOf(e));
 
             double wtotal = 0.0;
@@ -58,6 +62,7 @@ public class InferenceReputation {
 //                    wtotal += (1/3.0)*(timeWeight(i) / timetotal) + (1/3.0)*(amountWeight(i) / amounttotal)+
 //                            (1/3.0)*(getEdgeWeight(i)/totalWeightBasedOnEdgeNumber);  // here is issue some process amounttotal is zero
                     wtotal += getCombineWeight(i, timetotal, amounttotal, totalWeightBasedOnEdgeNumber);
+
                 }
                 if(Double.isNaN(wtotal)){
                     System.out.println("Common case total weight is NaN");
@@ -82,6 +87,9 @@ public class InferenceReputation {
                         System.out.println("Common case weight is Nan");
                     }
                     edge.weight = w;
+                    edge.amountWeight /= amounttotal;
+                    edge.timeWeight /= timetotal;
+                    edge.structureWeight /= totalWeightBasedOnEdgeNumber;
                     weights.get(e.getID()).put(from.getID(), w);
                 }
             }else{
@@ -97,12 +105,14 @@ public class InferenceReputation {
                             System.out.println("No data weight has NaN");
                         }
                         edge.weight = w;
+                        edge.timeWeight /= timetotal;
+                        edge.structureWeight /= totalWeightBasedOnEdgeNumber;
                         weights.get(e.getID()).put(from.getID(), w);
                     }
                 }else{
                     System.out.println("Some has data some doesnt :"+ edges.size());
                     for(EventEdge i : edges){
-                        EntityNode from = i.getSource();
+                        //EntityNode from = i.getSource();
 //                        wtotal += (1/3.0)*(timeWeight(i) / timetotal) + (1/3.0)*(amountWeight(i) / amounttotal)+
 //                                (1/3.0)*(getEdgeWeight(i)/totalWeightBasedOnEdgeNumber);
                         wtotal += getCombineWeight(i, timetotal, amounttotal, totalWeightBasedOnEdgeNumber);
@@ -112,12 +122,15 @@ public class InferenceReputation {
                     }
                     for(EventEdge edge : edges){
 
-                        double w= 0.0;
+                        double w;
                         EntityNode from = edge.getSource();
 //                        w = ((1/3.0)*(timeWeight(edge) / timetotal) +(1/3.0)* (amountWeight(edge) / amounttotal)+
 //                                (1/3.0)*(getEdgeWeight(edge)/totalWeightBasedOnEdgeNumber)) / wtotal;
                         w = getCombineWeight(edge, timetotal, amounttotal, totalWeightBasedOnEdgeNumber)/wtotal;
                         edge.weight = w;
+                        edge.timeWeight /= timetotal;
+                        edge.structureWeight /= totalWeightBasedOnEdgeNumber;
+                        edge.amountWeight /= amounttotal;
                         weights.get(e.getID()).put(from.getID(), w);
                     }
                 }
@@ -129,8 +142,13 @@ public class InferenceReputation {
     }
 
     private double getCombineWeight(EventEdge e, double timetotal, double amounttotal, double edgetotal){
-        return (0.1)*(timeWeight(e)/timetotal)+(0.4)*(amountWeight(e))/amounttotal+
-                (0.5)*(getEdgeWeight(e)/edgetotal);
+        return (0.1)*(timeWeight(e)/timetotal)+(0.5)*(amountWeight(e))/amounttotal+
+                (0.4)*(getEdgeWeight(e)/edgetotal);
+    }
+
+    private double getCombineWeight2(EventEdge e, double timetotal, double amounttotal, double edgetotal){
+        return ((0.6)*(amountWeight(e))/amounttotal+
+                (0.4)*(getEdgeWeight(e)/edgetotal))*Gaussian(POItime.doubleValue(),e.getEnd().doubleValue(),2);
     }
 
     public void calculateWeight(String input){
@@ -273,22 +291,25 @@ public class InferenceReputation {
         return weightBasedOnEdgeNumber;
     }
 
-    public void PageRankIteration(){
+    public void PageRankIteration(String detection){
         Set<EntityNode> vertexSet = graph.vertexSet();
         double fluctuation = 1.0;
         int iterTime = 0;
+        System.out.println();
         while(fluctuation >= 0.0000000000001){
             double culmativediff = 0.0;
             iterTime++;
             Map<Long, Double> preReputation = getReputation();
             for(EntityNode v: vertexSet){
+                if(v.getSignature().equals(detection))
+                    System.out.println(v.reputation);
                 Set<EventEdge> edges = graph.incomingEdgesOf(v);
                 if(edges.size() == 0) continue;
                 double rep = 0.0;
                 for(EventEdge edge: edges){
                     EntityNode source = edge.getSource();
                     int numberOfOutEgeFromSource = graph.outDegreeOf(source);
-//                    double total_weight = 0.0;
+                    double total_weight = 0.0;
 //                    for (EventEdge oe:graph.outgoingEdgesOf(source)){
 //                        total_weight += weights.get(graph.getEdgeTarget(oe).getID()).get(source.getID());
 //                    }
@@ -303,38 +324,57 @@ public class InferenceReputation {
         System.out.println(String.format("After %d times iteration, the reputation of each vertex is stable", iterTime));
     }
 
-    public void PageRankIteration2(String[] highRP, String[] lowRP){
-        double dumpingFactor = 0.9;
+    public void PageRankIteration2(String[] highRP,String[] midRP, String[] lowRP,String detection){
+        double alarmlevel = 0.85;
         Set<EntityNode> vertexSet = graph.vertexSet();
         Set<String> sources = new HashSet<>(Arrays.asList(highRP));
         sources.addAll(Arrays.asList(lowRP));
+        sources.addAll(Arrays.asList(midRP));
         double fluctuation = 1.0;
         int iterTime = 0;
-        while(fluctuation >= 0.0000000000001){
+        while(fluctuation>=10e-8){
             double culmativediff = 0.0;
             iterTime++;
             Map<Long, Double> preReputation = getReputation();
             for(EntityNode v: vertexSet){
+                if(v.getSignature().equals(detection))
+                    System.out.println(v.reputation);
                 if(sources.contains(v.getSignature())) continue;
                 Set<EventEdge> edges = graph.incomingEdgesOf(v);
-                if(edges.size() == 0) continue;
                 double rep = 0.0;
+                if(edges.size() == 0)
+                    rep = 0.5;
                 for(EventEdge edge: edges){
                     EntityNode source = edge.getSource();
-                    int numberOfOutEgeFromSource = graph.outDegreeOf(source);
+//                    int numberOfOutEgeFromSource = graph.outDegreeOf(source);
 //                    double total_weight = 0.0;
 //                    for (EventEdge oe:graph.outgoingEdgesOf(source)){
 //                        total_weight += weights.get(graph.getEdgeTarget(oe).getID()).get(source.getID());
 //                    }
-                    rep+=(preReputation.get(source.getID())*weights.get(v.getID()).get(source.getID())/1);
+//                    rep+=(preReputation.get(source.getID())*weights.get(v.getID()).get(source.getID())/1);
+                    rep += (preReputation.get(source.getID())* edge.weight);
                 }
-                rep = rep*dumpingFactor;
+                rep = rep*alarmlevel+0.5*(1-alarmlevel);
                 culmativediff += Math.abs(rep-preReputation.get(v.getID()));
                 v.setReputation(rep);
             }
             fluctuation = culmativediff;
         }
         System.out.println(String.format("After %d times iteration, the reputation of each vertex is stable", iterTime));
+    }
+
+    protected void normalizeWeightsAfterFiltering(){
+        Set<EntityNode> vertices = graph.vertexSet();
+        for(EntityNode v: vertices){
+            double totalWeight = 0.0;
+            Set<EventEdge> edges = graph.incomingEdgesOf(v);
+            for(EventEdge e: edges)
+                totalWeight += e.weight;
+            for(EventEdge e: edges){
+                e.weight = e.weight/totalWeight;
+            }
+
+        }
     }
 
     protected void fixReputation(String[] highRP){
@@ -351,6 +391,14 @@ public class InferenceReputation {
         high_rep /= count;
         for(EntityNode v: graph.vertexSet())
             v.setReputation(Math.min(1-(high_rep-reputation.get(v.getID()))/high_rep,1));
+    }
+
+    protected  void extractSuspects(double threshold){
+        List<EntityNode> vertices = new ArrayList(graph.vertexSet());
+        for(EntityNode v:vertices){
+            if(v.reputation>=threshold)
+                graph.removeVertex(v);
+        }
     }
 
     private Map<Long, Double> getReputation(){
@@ -529,9 +577,9 @@ public class InferenceReputation {
             }else if(midReputation.contains(node.getSignature())) {
                 node.reputation = 0.5;
             }else if(lowReputation.contains(node.getSignature())) {
-                node.reputation = -1.0;
+                node.reputation = 0.0;
             }else if(graph.incomingEdgesOf(node).size() == 0) {
-                node.reputation =0.0;
+                node.reputation = 0.0;
             }
         }
 
@@ -648,11 +696,11 @@ public class InferenceReputation {
     }
 
     /*this need to be tested*/
-    public void filterGraphBasedOnAverageWeight(){
+    public void filterGraphBasedOnAverageWeight(double threshold){
         double averageEdgeWeight = avergeEdgeWeight();
         double sd = sdEdgeWeight(averageEdgeWeight);
         List<EventEdge> edges = new ArrayList<>(graph.edgeSet());
-        double threshold = 0.138;//averageEdgeWeight/5;
+        //double threshold = 0.09;//averageEdgeWeight/9;
         System.out.println("threshold: "+threshold);
         for(int i=0; i< edges.size(); i++){
 
@@ -753,24 +801,29 @@ public class InferenceReputation {
         return res;
     }
 
-    public static void main(String[] args){
-        String[] locapIPS = {"10.0.2.15"};
-        String path = "/home/fang/thesis2/Data/Expdata2/aptgetInstallUnrar.txt";
-        ProcessGraph pGraph = new ProcessGraph(path, locapIPS);
-        pGraph.backTrack("/usr/bin/unrar-nonfree.dpkg-new", "File");
-        pGraph.CPR();
-        GraphSplit splitGraph = new GraphSplit(pGraph.afterCPR);
-        splitGraph.splitGraph();
-        InferenceReputation test = new InferenceReputation(splitGraph.inputGraph);
-        String[] entityWithHighReputation = {"10.0.2.15:58250->91.189.91.26:80"};
-        test.setReliableReputation(entityWithHighReputation);
-        try {
-            test.graphiterator.bfs("/usr/bin/unrar-nonfree.dpkg-new");
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+    private double Gaussian(double center, double x, double sigma) {
+        return Math.exp(-Math.pow(x - center, 2) / (2 * sigma * sigma)) /
+                Math.sqrt(2 * Math.PI * sigma * sigma);
+    }
 
-        test.checkTimeAndAmount();
+//    public static void main(String[] args){
+//        String[] locapIPS = {"10.0.2.15"};
+//        String path = "/home/fang/thesis2/Data/Expdata2/aptgetInstallUnrar.txt";
+//        ProcessGraph pGraph = new ProcessGraph(path, locapIPS);
+//        pGraph.backTrack("/usr/bin/unrar-nonfree.dpkg-new", "File");
+//        pGraph.CPR();
+//        GraphSplit splitGraph = new GraphSplit(pGraph.afterCPR);
+//        splitGraph.splitGraph();
+//        InferenceReputation test = new InferenceReputation(splitGraph.inputGraph);
+//        String[] entityWithHighReputation = {"10.0.2.15:58250->91.189.91.26:80"};
+//        test.setReliableReputation(entityWithHighReputation);
+//        try {
+//            test.graphiterator.bfs("/usr/bin/unrar-nonfree.dpkg-new");
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//
+//        test.checkTimeAndAmount();
 //        try {
 //            test.inferRuputation();
 //        }catch (Exception e){
@@ -787,7 +840,7 @@ public class InferenceReputation {
 
 
 
-    }
+//    }
 
 
 }

@@ -8,6 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="junit:junit:4.12" level="project" />
-    <orderEntry type="library" name="antlr4-runtime-4.6" level="project" />
+    <orderEntry type="library" exported="" name="antlr4-runtime-4.6" level="project" />
   </component>
 </module>

@@ -1,11 +1,9 @@
-midtermReport/main.aux
-midtermReport/main.bbl
-midtermReport/main.blg
-midtermReport/main.log
-midtermReport/main.pdf
-midtermReport/main.synctex.gz
+midtermReport/
 out/
 Data/
+graphForReport/
+Result/
+Slides/
 *.dot
 *.svg
-*.txts
+*.txt
