@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 
-public class eventEdgeProvider implements EdgeProvider<EntityNode, EventEdge> {
+public class EventEdgeProvider2 implements EdgeProvider<EntityNode, EventEdge> {
     //private BigDecimal val = new BigDecimal(43333);  // for test case of professor
     private BigDecimal val = new BigDecimal(44444);
     private long edgeID = 10;

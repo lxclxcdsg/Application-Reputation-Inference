@@ -63,8 +63,8 @@ public class SysdigOutputParser {
         PtoN = new HashSet<>();
         NtoP = new HashSet<>();
         String[] ptopSystemCall = {"execve"};
-        String[] ptofSystemCall ={"write","writev","fstat","close"};
-        String[] ftopSystemCall = {"read","readv","openat"};
+        String[] ptofSystemCall ={"write","writev"};//,"fstat","close"};
+        String[] ftopSystemCall = {"read","readv"};//,"openat"};
         String[] ptonSystemCall = {"recvmsg","sendto","read","write","writev"};
         String[] ntopSystemCal = {"write","writev","recvmsg","sendto","read"};
         for(String str:ptopSystemCall){
@@ -372,7 +372,6 @@ public class SysdigOutputParser {
                 if (path != null && pid != null && name != null) {
                     addFileToProcessEvent(pid, name, timestamp1, timestamp2, cpu, path, event, size, id);
                 }
-
             }
 
             if (PtoN.contains(event) && ip != null && localIPS.contains(srcIP)) {
@@ -431,7 +430,7 @@ public class SysdigOutputParser {
     }
 
 
-    private String[] getIPandPorts(String str){
+    private String[] getIPandPorts(String str) {
         String[] res = new String[4];
         String[] srcAndDest = str.split("->");
         if(srcAndDest.length<2){
@@ -449,7 +448,7 @@ public class SysdigOutputParser {
     }
 
     private void addProcessToFileEvent(String pid, String name, String timestamp1, String timestamp2,String path,
-                                       String event, long size,long id){
+                                       String event, long size,long id) {
         Process p = processHashMap.get(pid+name);
         FileEntity f = fileHashMap.get(path);
         String start = timestamp1+"."+timestamp2;
@@ -457,7 +456,7 @@ public class SysdigOutputParser {
         pfmap.put(start,pf);
     }
 
-    private void processToFileSetEnd(String timestamp1, String timestamp2, String latency,long id){
+    private void processToFileSetEnd(String timestamp1, String timestamp2, String latency,long id) {
         String end = timestamp1+"."+timestamp2;
         BigDecimal duration =new BigDecimal(latency);
         duration = duration.scaleByPowerOfTen(-9);
@@ -474,7 +473,7 @@ public class SysdigOutputParser {
         }
     }
 
-    private void addProcessToProcessEvent(String pid, String name, String timestamp1, String timestamp2,String event,long id){
+    private void addProcessToProcessEvent(String pid, String name, String timestamp1, String timestamp2,String event,long id) {
         Process source = processHashMap.get(pid+name);
         String start = timestamp1+"."+timestamp2;
         PtoPEvent pp = new PtoPEvent("Process To Process",timestamp1,timestamp2,source,null,event,id);
@@ -482,7 +481,7 @@ public class SysdigOutputParser {
 
     }
 
-    private void setProcessToProcessEventSinkAndEnd(String pid,String name,String timestamp1,String timestamp2,String latency){
+    private void setProcessToProcessEventSinkAndEnd(String pid,String name,String timestamp1,String timestamp2,String latency) {
         Process sink = processHashMap.get(pid+name);
         BigDecimal duration = new BigDecimal(latency);
         duration = duration.scaleByPowerOfTen(-9);
@@ -503,7 +502,7 @@ public class SysdigOutputParser {
     }
 
     private void addFileToProcessEvent(String pid, String name,String timestamp1,String timestamp2,String cpu,
-                                       String path, String event,long size,long id){
+                                       String path, String event,long size,long id) {
         Process sink = processHashMap.get(pid+name);
         if(sink == null){
             System.out.println("Pid and name not in Dict: "+pid+" "+name);
@@ -519,7 +518,7 @@ public class SysdigOutputParser {
     }
 
     private void addNetworkToProcessEvent(String srcIP,String srcP,String dstIp,String dstP,String pid,String name,
-                                          String timestamp1,String timestamp2,long size,String event,String cpu,long id){
+                                          String timestamp1,String timestamp2,long size,String event,String cpu,long id) {
         NetworkEntity source = networkHashMap.get(srcIP+":"+srcP+"->"+dstIp+":"+dstP);
         Process sink = processHashMap.get(pid+name);
         NtoPEvent np = new NtoPEvent("Network To Process",timestamp1,timestamp2,source,sink,event,id);
@@ -528,12 +527,12 @@ public class SysdigOutputParser {
         npmap.put(key,np);
     }
 
-    private void setNetworkToProcessEnd(NtoPEvent np, String timestamp1,String timestamp2){
+    private void setNetworkToProcessEnd(NtoPEvent np, String timestamp1,String timestamp2) {
         String end = timestamp1+"."+timestamp2;
         np.setEndTime(end);
     }
 
-    private void setFileToProcessEnd(FtoPEvent fp,String timestamp1,String timestamp2){
+    private void setFileToProcessEnd(FtoPEvent fp,String timestamp1,String timestamp2) {
         String end = timestamp1+"."+timestamp2;
         fp.setEndTime(end);
     }

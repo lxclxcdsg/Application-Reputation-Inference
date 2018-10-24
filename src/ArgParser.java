@@ -83,10 +83,10 @@ public class ArgParser {
                 "-h [highRP,...]\n" +
                 "-n [neutralRP,...]\n" +
                 "-l [lowRP,...]\n" +
-                "-o [output dir]\n" +
+                "-r [output dir]\n" +
                 "-s [suffix]\n" +
                 "-t <threshold>\n" +
-                "-o <track origin only?>");
+                "-o [track origin only?]");
     }
 
 }

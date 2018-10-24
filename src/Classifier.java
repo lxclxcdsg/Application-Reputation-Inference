@@ -52,6 +52,7 @@ public class Classifier {
             if(!sigs.contains(pair[1])) throw new Exception("Vertex not found: "+pair[1]);
             m.computeIfAbsent(pair[0],k -> new HashSet<>()).add(pair[1]);
         }
+        in.close();
 
         return m;
     }
@@ -65,6 +66,7 @@ public class Classifier {
         for(double[] edge : l){
             fw.write(String.format("%d %d:%f %d:%f %d:%f\n",(int)edge[3],1,edge[0],2,edge[1],3,edge[2]));
         }
+        fw.close();
     }
 
 

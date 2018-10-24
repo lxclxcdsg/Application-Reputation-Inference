@@ -12,7 +12,7 @@ public class ReadGraphFromDot {
     private BigDecimal rel = new BigDecimal(43333);
     public DirectedPseudograph<EntityNode, EventEdge> readGraph(String file){
 
-        DOTImporter<EntityNode, EventEdge> importer = new DOTImporter<EntityNode, EventEdge>(new EntityProvider(), new eventEdgeProvider());
+        DOTImporter<EntityNode, EventEdge> importer = new DOTImporter<EntityNode, EventEdge>(new EntityProvider(), new EventEdgeProvider2());
         DirectedPseudograph<EntityNode, EventEdge> g = new DirectedPseudograph<EntityNode, EventEdge>(EventEdge.class);
         try {
             importer.importGraph(g, new File(file));
