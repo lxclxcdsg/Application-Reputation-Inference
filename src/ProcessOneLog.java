@@ -90,7 +90,7 @@ public class ProcessOneLog {
             if(!trackOrigin)
                 infer.removeIsolatedIslands(detection);
             else
-                infer.removeIrrelaventVertices(detection);
+                infer.trimSiblings(detection);
 
             //infer.normalizeWeightsAfterFiltering();
             infer.initialReputation(highRP,midRP,lowRP);

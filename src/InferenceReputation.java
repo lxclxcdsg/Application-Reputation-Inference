@@ -463,7 +463,7 @@ public class InferenceReputation {
         }
     }
 
-    private double timeWeight(EventEdge edge){
+    private double timeWeight2(EventEdge edge){
         if(edge.getEnd().equals(POItime)){
             return 1;
         }else{
@@ -477,6 +477,16 @@ public class InferenceReputation {
                 System.out.println("timeWight should not be zero");
 
             }
+            if(res < 0.0) System.out.println("Minus TimeWeight:" + res);
+            return res;
+        }
+    }
+
+    private double timeWeight(EventEdge edge){
+        if(edge.getEnd().equals(POItime)){
+            return Double.MAX_VALUE;
+        }else{
+            double res = Math.log(1+1/Math.abs(edge.getEnd().doubleValue()-POItime.doubleValue()));
             if(res < 0.0) System.out.println("Minus TimeWeight:" + res);
             return res;
         }
@@ -756,7 +766,7 @@ public class InferenceReputation {
         }
     }
 
-    public void removeIrrelaventVertices(String POI){
+    public void trimSiblings(String POI){
         EntityNode POIVertex = graphiterator.getGraphVertex(POI);
         LinkedList<EventEdge> queue = new LinkedList<>(graph.incomingEdgesOf(POIVertex));
         Set<EntityNode> ancestors = new HashSet<>();
