@@ -19,7 +19,7 @@ public class ProcessOneLogTest {
 
         String resultDir = "/home/lcl/results/exp/";
         String suffix = "eigen";
-        double threshold = 0.01;
+        double threshold = 0.2;
         boolean trackOrigin = false;
 
 
@@ -79,7 +79,7 @@ public class ProcessOneLogTest {
             if(!trackOrigin)
                 infer.removeIsolatedIslands(detection);
             else
-                infer.removeIrrelaventVertices(detection);
+                infer.trimSiblings(detection);
 
 //            List<String> trusted = new ArrayList<>();
 //            trusted.addAll(Arrays.asList(highRP));
