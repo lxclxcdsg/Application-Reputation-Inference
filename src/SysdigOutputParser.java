@@ -62,11 +62,11 @@ public class SysdigOutputParser {
         FtoP = new HashSet<>();
         PtoN = new HashSet<>();
         NtoP = new HashSet<>();
-        String[] ptopSystemCall = {"execve"};
-        String[] ptofSystemCall ={"write","writev"};
-        String[] ftopSystemCall = {"read","readv","openat"};
-        String[] ptonSystemCall = {"recvmsg","sendto","read","write","writev"};
-        String[] ntopSystemCal = {"write","writev","recvmsg","sendto","read","recvfrom"};
+        String[] ptopSystemCall = MetaConfig.ptopSystemCall;
+        String[] ptofSystemCall = MetaConfig.ptofSystemCall;
+        String[] ftopSystemCall = MetaConfig.ftopSystemCall;
+        String[] ptonSystemCall = MetaConfig.ptonSystemCall;
+        String[] ntopSystemCall = MetaConfig.ntopSystemCall;
         for(String str:ptopSystemCall){
             PtoP.add(str);
         }
@@ -79,7 +79,7 @@ public class SysdigOutputParser {
         for(String str:ptonSystemCall){
             PtoN.add(str);
         }
-        for(String str:ntopSystemCal){
+        for(String str:ntopSystemCall){
             NtoP.add(str);
         }
 

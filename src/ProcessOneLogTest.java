@@ -22,7 +22,6 @@ public class ProcessOneLogTest {
         double threshold = 0.2;
         boolean trackOrigin = false;
 
-
         String[] paths = path.split("/");
         process(resultDir, suffix, threshold, trackOrigin, path,localIP,detection,highRP,midRP,lowRP, paths[paths.length-1]);
     }
@@ -145,9 +144,5 @@ public class ProcessOneLogTest {
                 e.printStackTrace();
             }
         }
-
-
-
-
     }
 }
